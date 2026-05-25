@@ -154,6 +154,56 @@ test("POST /users returns 409 for duplicate email", async () => {
 });
 
 // ---------------------------------------------------------------------------
+// DELETE /users/:id — admin deletes a non-admin user
+// ---------------------------------------------------------------------------
+
+test("DELETE /users/:id returns 401 when not logged in", async () => {
+  const res = await anon.delete(`/users/${ULF.email}`);
+  expect(res.statusCode).toEqual(401);
+});
+
+test("DELETE /users/:id returns 403 when logged in as a regular user", async () => {
+  const session = makeSession(app);
+  await session.post("/session").send(ULF);
+
+  const res = await session.delete(`/users/f1a2b3c4-0001-0001-0001-000000000001`);
+  expect(res.statusCode).toEqual(403);
+});
+
+test("DELETE /users/:id deletes a user and returns 204 when logged in as admin", async () => {
+  const session = makeSession(app);
+  await session.post("/session").send(ALICE);
+
+  // Create a user to delete
+  const created = await session.post("/users").send({
+    name: "To Delete",
+    email: "todelete@example.com",
+    password: "securepassword",
+    role: "user",
+  });
+  const userId = created.body.id;
+
+  const res = await session.delete(`/users/${userId}`);
+  expect(res.statusCode).toEqual(204);
+});
+
+test("DELETE /users/:id returns 403 when trying to delete an admin", async () => {
+  const session = makeSession(app);
+  await session.post("/session").send(ALICE);
+
+  const res = await session.delete(`/users/f1a2b3c4-0001-0001-0001-000000000001`);
+  expect(res.statusCode).toEqual(403);
+});
+
+test("DELETE /users/:id returns 404 for a non-existent user", async () => {
+  const session = makeSession(app);
+  await session.post("/session").send(ALICE);
+
+  const res = await session.delete(`/users/00000000-0000-0000-0000-000000000000`);
+  expect(res.statusCode).toEqual(404);
+});
+
+// ---------------------------------------------------------------------------
 // Session isolation — user A cannot see user B's orders
 // ---------------------------------------------------------------------------
 

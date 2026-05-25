@@ -1,14 +1,25 @@
+import { Trash2 } from "lucide-react";
 import { User } from "@/types/user";
 import { LockSystem } from "@/types/lock-system";
+import { Button } from "@/components/ui/button";
 import { AssignLockSystemSheet } from "./assign-lock-system-sheet";
+import { useDeleteUser } from "../hooks/use-users";
 
 type RegularUserTableProps = {
   users: User[];
   lockSystems: LockSystem[];
   onAssigned: () => void;
+  onDeleted: () => void;
 };
 
-export const RegularUserList = ({ users, lockSystems, onAssigned }: RegularUserTableProps) => {
+export const RegularUserList = ({ users, lockSystems, onAssigned, onDeleted }: RegularUserTableProps) => {
+  const { remove } = useDeleteUser();
+
+  async function handleDelete(userId: string) {
+    const ok = await remove(userId);
+    if (ok) onDeleted();
+  }
+
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
       <table className="w-full">
@@ -39,11 +50,22 @@ export const RegularUserList = ({ users, lockSystems, onAssigned }: RegularUserT
                 {user.assignedLockSystemIds.length}
               </td>
               <td className="px-3 py-2.5 text-right">
-                <AssignLockSystemSheet
-                  user={user}
-                  lockSystems={lockSystems}
-                  onAssigned={onAssigned}
-                />
+                <div className="flex items-center justify-end gap-2">
+                  <AssignLockSystemSheet
+                    user={user}
+                    lockSystems={lockSystems}
+                    onAssigned={onAssigned}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => handleDelete(user.id)}
+                    aria-label={`Delete ${user.name}`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </td>
             </tr>
           ))}

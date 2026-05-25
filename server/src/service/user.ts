@@ -75,6 +75,18 @@ export class UserService {
     return toPublic(user);
   }
 
+  /**
+   * Deletes a non-admin user by UUID.
+   * Returns "NOT_FOUND" if the user doesn't exist, "FORBIDDEN" if they are an admin.
+   */
+  async deleteUser(id: string): Promise<"OK" | "NOT_FOUND" | "FORBIDDEN"> {
+    const index = this.users.findIndex((u) => u.id === id);
+    if (index === -1) return "NOT_FOUND";
+    if (this.users[index].role === "admin") return "FORBIDDEN";
+    this.users.splice(index, 1);
+    return "OK";
+  }
+
   /** Removes a lock system assignment from a user. Returns undefined if the user does not exist. */
   async unassignLockSystem(
     userId: string,

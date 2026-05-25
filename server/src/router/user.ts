@@ -108,6 +108,33 @@ userRouter.patch(
   },
 );
 
+/** DELETE /users/:id — deletes a non-admin user. Admin only. */
+userRouter.delete(
+  "/:id",
+  async (req: Request<{ id: string }>, res: Response<string>) => {
+    try {
+      const admin = await requireAdmin(req, res);
+      if (!admin) return;
+
+      const result = await userService.deleteUser(req.params.id);
+
+      if (result === "NOT_FOUND") {
+        res.status(404).send("User not found");
+        return;
+      }
+
+      if (result === "FORBIDDEN") {
+        res.status(403).send("Admin accounts cannot be deleted");
+        return;
+      }
+
+      res.status(204).send();
+    } catch (e: any) {
+      res.status(500).send(e.message);
+    }
+  },
+);
+
 /** PATCH /users/:id/unassign-lock-system — removes a lock system assignment from a user. Admin only. */
 userRouter.patch(
   "/:id/unassign-lock-system",

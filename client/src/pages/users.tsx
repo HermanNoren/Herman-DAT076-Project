@@ -26,6 +26,7 @@ export const UsersPage = () => {
             users={regularUsers}
             lockSystems={lockSystems}
             onAssigned={refetchUsers}
+            onDeleted={refetchUsers}
           />
         </section>
 

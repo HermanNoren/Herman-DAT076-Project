@@ -27,6 +27,11 @@ export async function assignLockSystem(
   return response.data;
 }
 
+/** Deletes a non-admin user by UUID. */
+export async function deleteUser(userId: string): Promise<void> {
+  await api.delete(`/users/${userId}`);
+}
+
 /** Removes a lock system assignment from a user. */
 export async function unassignLockSystem(
   userId: string,

@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  getOrders,
-  placeOrder as placeOrderApi,
-  updateOrderStatus as updateOrderStatusApi,
-} from "@/api/order";
+import { getOrders, placeOrder, updateOrderStatus } from "@/api/order";
 import { getAllKeys } from "@/api/lock-systems";
 import { Order, OrderReason, OrderStatus } from "@/types/order";
 import { Key } from "@/types/key";
@@ -37,7 +33,9 @@ export function useOrders() {
     }
 
     fetchOrders();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [tick]);
 
   return { orders, isLoading, error, refetch };
@@ -52,9 +50,13 @@ export function useAllKeys() {
   useEffect(() => {
     let cancelled = false;
     getAllKeys()
-      .then((data) => { if (!cancelled) setKeys(data); })
+      .then((data) => {
+        if (!cancelled) setKeys(data);
+      })
       .catch(() => {});
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return { keys };
@@ -76,7 +78,7 @@ export function usePlaceOrder() {
     setIsLoading(true);
     setError(null);
     try {
-      await placeOrderApi(keyId, quantity, reason, reasonDetail);
+      await placeOrder(keyId, quantity, reason, reasonDetail);
       return true;
     } catch (e) {
       setError(getApiError(e, "Failed to place order"));
@@ -96,11 +98,14 @@ export function useUpdateOrderStatus() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function updateStatus(orderId: string, status: OrderStatus): Promise<boolean> {
+  async function updateStatus(
+    orderId: string,
+    status: OrderStatus,
+  ): Promise<boolean> {
     setIsLoading(true);
     setError(null);
     try {
-      await updateOrderStatusApi(orderId, status);
+      await updateOrderStatus(orderId, status);
       return true;
     } catch (e) {
       setError(getApiError(e, "Failed to update order status"));

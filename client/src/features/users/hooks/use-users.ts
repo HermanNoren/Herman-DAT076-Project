@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   getUsers,
-  createUser as createUserApi,
+  createUser,
   assignLockSystem,
   unassignLockSystem,
+  deleteUser,
 } from "@/api/users";
 import { User, UserRole } from "@/types/user";
 import { getApiError } from "@/lib/utils";
@@ -61,7 +62,7 @@ export function useCreateUser() {
     setIsLoading(true);
     setError(null);
     try {
-      await createUserApi(name, email, password, role);
+      await createUser(name, email, password, role);
       return true;
     } catch (e) {
       setError(getApiError(e, "Failed to create user"));
@@ -126,4 +127,28 @@ export function useUnassignLockSystem() {
   }
 
   return { unassign, isLoading, error };
+}
+
+/**
+ * Hook to delete a non-admin user.
+ */
+export function useDeleteUser() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function remove(userId: string): Promise<boolean> {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await deleteUser(userId);
+      return true;
+    } catch (e) {
+      setError(getApiError(e, "Failed to delete user"));
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return { remove, isLoading, error };
 }
