@@ -1,7 +1,7 @@
 import { KeyRound } from "lucide-react";
 import { LockSystem } from "@/types/lock-system";
 import { Key } from "@/types/key";
-import { useUser } from "@/context/user-context";
+import { useAuth } from "@/context/auth-context";
 import { PlaceOrderSheet } from "@/features/orders/components/place-order-sheet";
 
 type Props = {
@@ -10,7 +10,7 @@ type Props = {
 };
 
 export const LockSystemKeys = ({ lockSystem, keys }: Props) => {
-  const { user } = useUser();
+  const { user } = useAuth();
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
@@ -55,7 +55,7 @@ export const LockSystemKeys = ({ lockSystem, keys }: Props) => {
                 </span>
               </td>
               <td className="px-5 py-3.5 text-right">
-                {user.role === "user" && (
+                {user?.role === "user" && (
                   <PlaceOrderSheet keyItem={key} lockSystem={lockSystem} />
                 )}
               </td>

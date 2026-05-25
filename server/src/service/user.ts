@@ -87,4 +87,20 @@ export class UserService {
     );
     return toPublic(user);
   }
+
+  /**
+   * Checks email + password against stored credentials.
+   * Returns the public user on success, or "INVALID" if the email is not found or the password
+   * does not match. The same sentinel is used for both cases to avoid revealing which failed.
+   */
+  async verifyCredentials(
+    email: string,
+    password: string,
+  ): Promise<UserPublic | "INVALID"> {
+    const user = this.users.find((u) => u.email === email);
+    if (!user) return "INVALID";
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) return "INVALID";
+    return toPublic(user);
+  }
 }

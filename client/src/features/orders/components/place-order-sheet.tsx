@@ -25,7 +25,6 @@ import {
 import { Key } from "@/types/key";
 import { LockSystem } from "@/types/lock-system";
 import { OrderReason } from "@/types/order";
-import { useUser } from "@/context/user-context";
 import { usePlaceOrder } from "../hooks/use-orders";
 
 const ORDER_REASONS: { value: OrderReason; label: string }[] = [
@@ -61,7 +60,6 @@ type Props = {
 
 export const PlaceOrderSheet = ({ keyItem, lockSystem }: Props) => {
   const [open, setOpen] = useState(false);
-  const { user } = useUser();
   const { place, isLoading, error } = usePlaceOrder();
 
   const form = useForm<FormValues>({
@@ -73,7 +71,6 @@ export const PlaceOrderSheet = ({ keyItem, lockSystem }: Props) => {
 
   async function onSubmit(values: FormValues) {
     const ok = await place(
-      user.id,
       keyItem.id,
       values.quantity,
       values.reason,

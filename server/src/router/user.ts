@@ -1,17 +1,20 @@
 import express, { Request, Response } from "express";
-import { userService } from "./lock-system";
-import { lockSystemService } from "./lock-system";
+import { userService, lockSystemService } from "./lock-system";
 import { UserPublic, UserRole } from "../model/user.interface";
-
-export const userRouter = express.Router();
+import { requireAdmin } from "./auth";
 
 const USER_ROLES: UserRole[] = ["admin", "user"];
 
-/** GET /users — returns all users (password hashes never included). */
+export const userRouter = express.Router();
+
+/** GET /users — returns all users. Admin only. */
 userRouter.get(
   "/",
-  async (_req: Request, res: Response<UserPublic[] | string>) => {
+  async (req: Request, res: Response<UserPublic[] | string>) => {
     try {
+      const admin = await requireAdmin(req, res);
+      if (!admin) return;
+
       const users = await userService.getUsers();
       res.status(200).send(users);
     } catch (e: any) {
@@ -20,7 +23,7 @@ userRouter.get(
   },
 );
 
-/** POST /users — creates a new user with a hashed password. */
+/** POST /users — creates a new user. Admin only. */
 userRouter.post(
   "/",
   async (
@@ -28,10 +31,13 @@ userRouter.post(
     res: Response<UserPublic | string>,
   ) => {
     try {
+      const admin = await requireAdmin(req, res);
+      if (!admin) return;
+
       const { name, email, password, role } = req.body;
 
-      if (typeof name !== "string") {
-        res.status(400).send("Field 'name' must be a string");
+      if (typeof name !== "string" || name.trim() === "") {
+        res.status(400).send("Field 'name' must be a non-empty string");
         return;
       }
 
@@ -41,7 +47,7 @@ userRouter.post(
       }
 
       if (typeof password !== "string" || password.length < 8) {
-        res.status(400).send("Field 'password' must be a string of at least 8 characters");
+        res.status(400).send("Field 'password' must be at least 8 characters");
         return;
       }
 
@@ -64,7 +70,7 @@ userRouter.post(
   },
 );
 
-/** PATCH /users/:id/assign-lock-system — assigns a lock system to a user. */
+/** PATCH /users/:id/assign-lock-system — assigns a lock system to a user. Admin only. */
 userRouter.patch(
   "/:id/assign-lock-system",
   async (
@@ -72,6 +78,9 @@ userRouter.patch(
     res: Response<UserPublic | string>,
   ) => {
     try {
+      const admin = await requireAdmin(req, res);
+      if (!admin) return;
+
       const userId = req.params.id;
       const { lockSystemId } = req.body;
 
@@ -99,7 +108,7 @@ userRouter.patch(
   },
 );
 
-/** PATCH /users/:id/unassign-lock-system — removes a lock system assignment from a user. */
+/** PATCH /users/:id/unassign-lock-system — removes a lock system assignment from a user. Admin only. */
 userRouter.patch(
   "/:id/unassign-lock-system",
   async (
@@ -107,6 +116,9 @@ userRouter.patch(
     res: Response<UserPublic | string>,
   ) => {
     try {
+      const admin = await requireAdmin(req, res);
+      if (!admin) return;
+
       const userId = req.params.id;
       const { lockSystemId } = req.body;
 

@@ -9,8 +9,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
-import { useUser } from "@/context/user-context";
-import { UserSelect } from "./user-select";
 
 const routeLabels: Record<string, string> = {
   "lock-systems": "Lock Systems",
@@ -24,7 +22,6 @@ function segmentLabel(segment: string): string {
 
 export const AppHeader = () => {
   const { pathname } = useLocation();
-  const { user, setUserId, demoUsers } = useUser();
 
   const segments = pathname.split("/").filter(Boolean);
 
@@ -62,14 +59,6 @@ export const AppHeader = () => {
           })}
         </BreadcrumbList>
       </Breadcrumb>
-
-      <div className="ml-auto flex items-center gap-3">
-        <UserSelect
-          activeUserId={user.id}
-          setActiveUserId={setUserId}
-          demoUsers={demoUsers}
-        />
-      </div>
     </header>
   );
 };

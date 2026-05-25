@@ -24,12 +24,14 @@ const initials = (name: string) =>
 
 export const NavUser = ({
   user,
+  onLogout,
 }: {
   user: {
     name: string;
     subtitle: string;
     avatar: string;
   };
+  onLogout: () => void;
 }) => {
   const { isMobile } = useSidebar();
 
@@ -76,7 +78,7 @@ export const NavUser = ({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={onLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

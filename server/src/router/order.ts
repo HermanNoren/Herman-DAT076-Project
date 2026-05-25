@@ -3,6 +3,7 @@ import { Order, OrderReason, OrderStatus } from "../model/order.interface";
 import { OrderService } from "../service/order";
 import { userService } from "./lock-system";
 import { keyService } from "./key";
+import { requireAdmin, requireAuth } from "./auth";
 
 export const orderRouter = express.Router();
 export const orderService = new OrderService();
@@ -10,18 +11,18 @@ export const orderService = new OrderService();
 const ORDER_REASONS: OrderReason[] = ["lost", "damaged", "additional_copy", "stolen", "other"];
 const ORDER_STATUSES: OrderStatus[] = ["placed", "ready", "collected"];
 
-/** GET /orders?userId= — returns all orders, or only those belonging to the given user. */
+/** GET /orders — returns all orders (admin) or only the logged-in user's orders (user). */
 orderRouter.get(
   "/",
-  async (
-    req: Request<{}, {}, {}, { userId?: string }>,
-    res: Response<Order[] | string>,
-  ) => {
+  async (req: Request, res: Response<Order[] | string>) => {
     try {
-      const { userId } = req.query;
-      const orders = userId
-        ? await orderService.getOrdersByUser(userId)
-        : await orderService.getOrders();
+      const user = await requireAuth(req, res);
+      if (!user) return;
+
+      const orders = user.role === "admin"
+        ? await orderService.getOrders()
+        : await orderService.getOrdersByUser(user.id);
+
       res.status(200).send(orders);
     } catch (e: any) {
       res.status(500).send(e.message);
@@ -29,18 +30,21 @@ orderRouter.get(
   },
 );
 
-/** POST /orders — places a new key order for a user. */
+/** POST /orders — places a new key order for the logged-in user. */
 orderRouter.post(
   "/",
   async (
-    req: Request<{}, {}, { userId: string; keyId: string; quantity: number; reason: OrderReason; reasonDetail?: string }>,
+    req: Request<{}, {}, { keyId: string; quantity: number; reason: OrderReason; reasonDetail?: string }>,
     res: Response<Order | string>,
   ) => {
     try {
-      const { userId, keyId, quantity, reason, reasonDetail } = req.body;
+      const user = await requireAuth(req, res);
+      if (!user) return;
 
-      if (typeof userId !== "string" || typeof keyId !== "string") {
-        res.status(400).send("Fields 'userId' and 'keyId' must be strings");
+      const { keyId, quantity, reason, reasonDetail } = req.body;
+
+      if (typeof keyId !== "string") {
+        res.status(400).send("Field 'keyId' must be a string");
         return;
       }
 
@@ -60,7 +64,7 @@ orderRouter.post(
       }
 
       const result = await orderService.placeOrder(
-        userId,
+        user.id,
         keyId,
         quantity,
         reason,
@@ -80,7 +84,7 @@ orderRouter.post(
       }
 
       if (result === "FORBIDDEN") {
-        res.status(403).send("User cannot order keys from this lock system");
+        res.status(403).send("You are not assigned to this lock system");
         return;
       }
 
@@ -91,7 +95,7 @@ orderRouter.post(
   },
 );
 
-/** PATCH /orders/:id/status — advances the status of an order (admin only). */
+/** PATCH /orders/:id/status — advances the status of an order. Admin only. */
 orderRouter.patch(
   "/:id/status",
   async (
@@ -99,6 +103,9 @@ orderRouter.patch(
     res: Response<Order | string>,
   ) => {
     try {
+      const admin = await requireAdmin(req, res);
+      if (!admin) return;
+
       const { status } = req.body;
 
       if (!ORDER_STATUSES.includes(status)) {

@@ -1,22 +1,20 @@
 import { api } from "./axios";
 import { Order, OrderReason, OrderStatus } from "../types/order";
 
-/** Fetches all orders, or only those belonging to the given user if a userId is provided. */
-export async function getOrders(userId?: string): Promise<Order[]> {
-  const url = userId ? `/orders?userId=${userId}` : "/orders";
-  const response = await api.get(url);
+/** Fetches all orders (admin) or the current user's orders (user) based on session. */
+export async function getOrders(): Promise<Order[]> {
+  const response = await api.get("/orders");
   return response.data;
 }
 
-/** Places a new order for a key on behalf of the given user. */
+/** Places a new order for a key on behalf of the current session user. */
 export async function placeOrder(
-  userId: string,
   keyId: string,
   quantity: number,
   reason: OrderReason,
   reasonDetail?: string,
 ): Promise<Order> {
-  const response = await api.post("/orders", { userId, keyId, quantity, reason, reasonDetail });
+  const response = await api.post("/orders", { keyId, quantity, reason, reasonDetail });
   return response.data;
 }
 

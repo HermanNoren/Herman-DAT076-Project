@@ -8,11 +8,9 @@ export async function getLockSystem(referenceCode: string): Promise<LockSystem> 
   return response.data;
 }
 
-/** Fetches all lock systems visible to the given user (admin sees all, users see assigned only). */
-export async function getVisibleLockSystems(
-  userId: string,
-): Promise<LockSystem[]> {
-  const response = await api.get(`/lock-systems?userId=${userId}`);
+/** Fetches all lock systems visible to the current session user (admin sees all, users see assigned only). */
+export async function getVisibleLockSystems(): Promise<LockSystem[]> {
+  const response = await api.get("/lock-systems");
   return response.data;
 }
 

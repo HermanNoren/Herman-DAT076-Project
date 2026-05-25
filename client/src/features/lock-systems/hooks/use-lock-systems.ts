@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { getLockSystem, getVisibleLockSystems, getAllKeys, createLockSystem } from "@/api/lock-systems";
-import { useUser } from "@/context/user-context";
 import { LockSystem } from "@/types/lock-system";
 import { createKey as createKeyApi, getKeysByLockSystem } from "@/api/keys";
 import { AccessLevel, Key } from "@/types/key";
@@ -10,7 +9,6 @@ import { getApiError } from "@/lib/utils";
  * Hook to fetch all lock systems visible to the current user.
  */
 export function useLockSystems() {
-  const { user } = useUser();
   const [lockSystems, setLockSystems] = useState<LockSystem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +23,7 @@ export function useLockSystems() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await getVisibleLockSystems(user.id);
+        const data = await getVisibleLockSystems();
         if (!cancelled) setLockSystems(data);
       } catch (e) {
         const message = getApiError(e, "Failed to fetch lock systems");
@@ -40,7 +38,7 @@ export function useLockSystems() {
     return () => {
       cancelled = true;
     };
-  }, [user.id, tick]);
+  }, [tick]);
 
   return { lockSystems, isLoading, error, refetch };
 }

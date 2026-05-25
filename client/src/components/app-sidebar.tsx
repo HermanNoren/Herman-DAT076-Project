@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { NavLink } from "react-router-dom";
 import { NavMain } from "@/components/nav-main";
@@ -15,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Aperture, KeyRound, ShoppingCart, Users } from "lucide-react";
 import { LucideIcon } from "lucide-react";
-import { useUser } from "@/context/user-context";
+import { useAuth } from "@/context/auth-context";
 
 type NavItem = {
   title: string;
@@ -33,15 +31,15 @@ const navItems: NavItem[] = [
 export const AppSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {
-  const { user } = useUser();
+  const { user, logout } = useAuth();
 
   const visibleItems = navItems.filter(
-    (item) => !item.adminOnly || user.role === "admin",
+    (item) => !item.adminOnly || user?.role === "admin",
   );
 
   const navUser = {
-    name: user.name,
-    subtitle: user.role.charAt(0).toUpperCase() + user.role.slice(1),
+    name: user?.name ?? "",
+    subtitle: user ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : "",
     avatar: "",
   };
 
@@ -66,7 +64,7 @@ export const AppSidebar = ({
         <NavMain items={visibleItems} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={navUser} />
+        <NavUser user={navUser} onLogout={logout} />
       </SidebarFooter>
     </Sidebar>
   );

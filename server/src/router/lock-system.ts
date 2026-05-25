@@ -2,36 +2,23 @@ import express, { Request, Response } from "express";
 import { LockSystemService } from "../service/lock-system";
 import { UserService } from "../service/user";
 import { LockSystem } from "../model/lock-system.interface";
+import { requireAdmin, requireAuth } from "./auth";
 
 export const lockSystemRouter = express.Router();
 
 export const userService = new UserService();
 export const lockSystemService = new LockSystemService();
 
-/** GET /lock-systems?userId= — returns all systems visible to the user (all for admin, assigned-only for users). */
+/** GET /lock-systems — returns all systems visible to the logged-in user (all for admin, assigned-only for users). */
 lockSystemRouter.get(
   "/",
-  async (
-    req: Request<{}, {}, {}, { userId?: string }>,
-    res: Response<LockSystem[] | string>,
-  ) => {
+  async (req: Request, res: Response<LockSystem[] | string>) => {
     try {
-      const userId = req.query.userId;
-      if (!userId) {
-        res.status(400).send("Query param userId is required");
-        return;
-      }
+      const user = await requireAuth(req, res);
+      if (!user) return;
 
-      const systems = await lockSystemService.getVisibleForUser(
-        userId,
-        userService,
-      );
-      if (!systems) {
-        res.status(404).send("User not found");
-        return;
-      }
-
-      res.status(200).send(systems);
+      const systems = await lockSystemService.getVisibleForUser(user.id, userService);
+      res.status(200).send(systems ?? []);
     } catch (e: any) {
       res.status(500).send(e.message);
     }
@@ -41,11 +28,11 @@ lockSystemRouter.get(
 /** GET /lock-systems/:referenceCode — returns a single lock system by reference code. */
 lockSystemRouter.get(
   "/:referenceCode",
-  async (
-    req: Request<{ referenceCode: string }>,
-    res: Response<LockSystem | string>,
-  ) => {
+  async (req: Request<{ referenceCode: string }>, res: Response<LockSystem | string>) => {
     try {
+      const user = await requireAuth(req, res);
+      if (!user) return;
+
       const system = await lockSystemService.getByReferenceCode(req.params.referenceCode);
       if (!system) {
         res.status(404).send("Lock system not found");
@@ -58,7 +45,7 @@ lockSystemRouter.get(
   },
 );
 
-/** POST /lock-systems — creates a new lock system. */
+/** POST /lock-systems — creates a new lock system. Admin only. */
 lockSystemRouter.post(
   "/",
   async (
@@ -66,6 +53,9 @@ lockSystemRouter.post(
     res: Response<LockSystem | string>,
   ) => {
     try {
+      const admin = await requireAdmin(req, res);
+      if (!admin) return;
+
       const { name, description } = req.body;
 
       if (typeof name !== "string" || typeof description !== "string") {

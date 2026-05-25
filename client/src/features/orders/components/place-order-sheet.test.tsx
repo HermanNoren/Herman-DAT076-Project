@@ -1,30 +1,17 @@
 /**
  * Tests for the PlaceOrderSheet component.
- * Both useUser (context) and usePlaceOrder (hook) are mocked.
+ * usePlaceOrder is mocked so no real HTTP requests are made.
  */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { PlaceOrderSheet } from './place-order-sheet';
 import { Key } from '@/types/key';
 import { LockSystem } from '@/types/lock-system';
-import { User } from '@/types/user';
 
-jest.mock('@/context/user-context', () => ({
-  useUser: jest.fn(),
-}));
 jest.mock('../hooks/use-orders', () => ({
   usePlaceOrder: jest.fn(),
 }));
 
-import { useUser } from '@/context/user-context';
 import { usePlaceOrder } from '../hooks/use-orders';
-
-const MOCK_USER: User = {
-  id: 'f1a2b3c4-0001-0001-0001-000000000002',
-  name: 'Ulf User',
-  email: 'ulf@example.com',
-  role: 'user',
-  assignedLockSystemIds: ['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'],
-};
 
 const MOCK_KEY: Key = {
   id: 'e1f2a3b4-0001-0001-0001-000000000001',
@@ -43,11 +30,6 @@ const MOCK_LOCK_SYSTEM: LockSystem = {
 
 describe('PlaceOrderSheet', () => {
   beforeEach(() => {
-    jest.mocked(useUser).mockReturnValue({
-      user: MOCK_USER,
-      setUserId: jest.fn(),
-      demoUsers: [MOCK_USER],
-    });
     jest.mocked(usePlaceOrder).mockReturnValue({
       place: jest.fn().mockResolvedValue(true),
       isLoading: false,
@@ -92,13 +74,13 @@ describe('PlaceOrderSheet', () => {
     jest.mocked(usePlaceOrder).mockReturnValue({
       place: jest.fn().mockResolvedValue(false),
       isLoading: false,
-      error: 'User is not assigned to this lock system',
+      error: 'You are not assigned to this lock system',
     });
 
     renderSheet();
     fireEvent.click(screen.getByRole('button', { name: /Order/i }));
     await waitFor(() => {
-      expect(screen.getByText('User is not assigned to this lock system')).toBeInTheDocument();
+      expect(screen.getByText('You are not assigned to this lock system')).toBeInTheDocument();
     });
   });
 });

@@ -3,11 +3,11 @@ import { PageHeader } from "@/components/page-header";
 import { useLockSystem, useLockSystemKeys } from "@/features/lock-systems/hooks/use-lock-systems";
 import { LockSystemKeys } from "@/features/lock-systems/components/lock-system-keys";
 import { CreateKeySheet } from "@/features/lock-systems/components/create-key-sheet";
-import { useUser } from "@/context/user-context";
+import { useAuth } from "@/context/auth-context";
 
 export const LockSystemDetailPage = () => {
   const { referenceCode } = useParams<{ referenceCode: string }>();
-  const { user } = useUser();
+  const { user } = useAuth();
   const { lockSystem } = useLockSystem(referenceCode!);
   const { keys, refetch } = useLockSystemKeys(lockSystem?.id ?? "");
 
@@ -17,7 +17,7 @@ export const LockSystemDetailPage = () => {
         title={lockSystem?.name ?? ""}
         description={`${lockSystem?.referenceCode} ⋅ ${lockSystem?.description}`}
         action={
-          user.role === "admin" && lockSystem ? (
+          user?.role === "admin" && lockSystem ? (
             <CreateKeySheet lockSystemId={lockSystem.id} onCreated={refetch} />
           ) : undefined
         }

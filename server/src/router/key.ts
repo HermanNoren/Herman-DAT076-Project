@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
 import { AccessLevel, Key } from "../model/key.interface";
-
-const ACCESS_LEVELS: AccessLevel[] = ["Master", "Individual", "Common"];
 import { KeyService } from "../service/key";
 import { lockSystemService } from "./lock-system";
+import { requireAdmin, requireAuth } from "./auth";
+
+const ACCESS_LEVELS: AccessLevel[] = ["Master", "Individual", "Common"];
 
 export const keyRouter = express.Router();
 export const keyService = new KeyService();
@@ -16,6 +17,9 @@ keyRouter.get(
     res: Response<Key[] | string>,
   ) => {
     try {
+      const user = await requireAuth(req, res);
+      if (!user) return;
+
       const { lockSystemId } = req.query;
 
       if (!lockSystemId) {
@@ -38,7 +42,7 @@ keyRouter.get(
   },
 );
 
-/** POST /keys — creates a new key inside a lock system. */
+/** POST /keys — creates a new key inside a lock system. Admin only. */
 keyRouter.post(
   "/",
   async (
@@ -50,6 +54,9 @@ keyRouter.post(
     res: Response<Key | string>,
   ) => {
     try {
+      const admin = await requireAdmin(req, res);
+      if (!admin) return;
+
       const { label, description, accessLevel, lockSystemId } = req.body;
 
       if (
@@ -57,16 +64,12 @@ keyRouter.post(
         typeof description !== "string" ||
         typeof lockSystemId !== "string"
       ) {
-        res
-          .status(400)
-          .send("Fields 'label', 'description' and 'lockSystemId' are invalid");
+        res.status(400).send("Fields 'label', 'description' and 'lockSystemId' are invalid");
         return;
       }
 
       if (!ACCESS_LEVELS.includes(accessLevel)) {
-        res
-          .status(400)
-          .send(`Field 'accessLevel' must be one of: ${ACCESS_LEVELS.join(", ")}`);
+        res.status(400).send(`Field 'accessLevel' must be one of: ${ACCESS_LEVELS.join(", ")}`);
         return;
       }
 

@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/page-header";
-import { useUser } from "@/context/user-context";
+import { useAuth } from "@/context/auth-context";
 import { useOrders, useAllKeys, useUpdateOrderStatus } from "@/features/orders/hooks/use-orders";
 import { useUsers } from "@/features/users/hooks/use-users";
 import { useLockSystems } from "@/features/lock-systems/hooks/use-lock-systems";
@@ -186,10 +186,10 @@ function UserOrderList({ orders, keys, lockSystems }: UserOrdersProps) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export const OrdersPage = () => {
-  const { user } = useUser();
-  const isAdmin = user.role === "admin";
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
-  const { orders, refetch } = useOrders(isAdmin ? undefined : user.id);
+  const { orders, refetch } = useOrders();
   const { keys } = useAllKeys();
   const { lockSystems } = useLockSystems();
   const { users } = useUsers();

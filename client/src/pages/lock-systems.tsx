@@ -2,10 +2,10 @@ import { PageHeader } from "@/components/page-header";
 import { LockSystemList } from "@/features/lock-systems/components/lock-system-list";
 import { CreateLockSystemSheet } from "@/features/lock-systems/components/create-lock-system-sheet";
 import { useLockSystems, useKeyCountsByLockSystem } from "@/features/lock-systems/hooks/use-lock-systems";
-import { useUser } from "@/context/user-context";
+import { useAuth } from "@/context/auth-context";
 
 export const LockSystemsPage = () => {
-  const { user } = useUser();
+  const { user } = useAuth();
   const { lockSystems, refetch } = useLockSystems();
   const { counts: keyCounts } = useKeyCountsByLockSystem();
 
@@ -15,7 +15,7 @@ export const LockSystemsPage = () => {
         title="Lock Systems"
         description="Manage and view your key systems"
         action={
-          user.role === "admin" ? (
+          user?.role === "admin" ? (
             <CreateLockSystemSheet onCreated={refetch} />
           ) : undefined
         }

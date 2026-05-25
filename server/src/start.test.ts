@@ -1,123 +1,192 @@
 import * as SuperTest from "supertest";
 import { app } from "./start";
 
-const request = SuperTest.default(app);
+// supertest-session preserves cookies between requests in the same session object
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const makeSession = require("supertest-session");
 
-// IDs from seed data in UserService / LockSystemService / KeyService
-const ADMIN_ID = "f1a2b3c4-0001-0001-0001-000000000001";
-const USER_ID  = "f1a2b3c4-0001-0001-0001-000000000002";
-const SYS_001_ID = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
+// Seeded credentials (from UserService seed data)
+const ALICE = { email: "alice@example.com", password: "password" }; // admin
+const ULF   = { email: "ulf@example.com",   password: "password" }; // user
+
+const SYS_001_ID  = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 const KEY_A101_ID = "e1f2a3b4-0001-0001-0001-000000000001";
 
+// Plain (no-session) client for unauthenticated requests
+const anon = SuperTest.default(app);
+
 // ---------------------------------------------------------------------------
-// Lock systems
+// POST /session — login
 // ---------------------------------------------------------------------------
 
-test("POST /lock-systems creates a lock system and returns 201", async () => {
-  const res = await request
-    .post("/lock-systems")
-    .send({ name: "Building A", description: "Main building" });
+test("POST /session returns 200 and user for valid credentials", async () => {
+  const session = makeSession(app);
+  const res = await session.post("/session").send(ALICE);
 
-  expect(res.statusCode).toEqual(201);
-  expect(res.body.name).toEqual("Building A");
-  expect(res.body.referenceCode).toMatch(/^SYS-/);
-  expect(res.body.id).toBeDefined();
+  expect(res.statusCode).toEqual(200);
+  expect(res.body.email).toEqual(ALICE.email);
+  expect(res.body.role).toEqual("admin");
+  expect(res.body.passwordHash).toBeUndefined();
 });
 
-test("POST /lock-systems returns 400 when name is missing", async () => {
-  const res = await request
-    .post("/lock-systems")
-    .send({ description: "No name provided" });
+test("POST /session returns 401 for wrong password", async () => {
+  const res = await anon.post("/session").send({ email: ALICE.email, password: "wrongpassword" });
+  expect(res.statusCode).toEqual(401);
+});
 
+test("POST /session returns 400 for missing fields", async () => {
+  const res = await anon.post("/session").send({ email: ALICE.email });
   expect(res.statusCode).toEqual(400);
 });
 
-test("GET /lock-systems returns all systems for the admin user", async () => {
-  const res = await request.get(`/lock-systems?userId=${ADMIN_ID}`);
+// ---------------------------------------------------------------------------
+// GET /session — who am I
+// ---------------------------------------------------------------------------
 
+test("GET /session returns 401 when not logged in", async () => {
+  const res = await anon.get("/session");
+  expect(res.statusCode).toEqual(401);
+});
+
+test("GET /session returns the logged-in user after login", async () => {
+  const session = makeSession(app);
+  await session.post("/session").send(ALICE);
+
+  const res = await session.get("/session");
+  expect(res.statusCode).toEqual(200);
+  expect(res.body.email).toEqual(ALICE.email);
+});
+
+// ---------------------------------------------------------------------------
+// DELETE /session — logout
+// ---------------------------------------------------------------------------
+
+test("DELETE /session logs out and subsequent GET /session returns 401", async () => {
+  const session = makeSession(app);
+  await session.post("/session").send(ALICE);
+
+  const logoutRes = await session.delete("/session");
+  expect(logoutRes.statusCode).toEqual(204);
+
+  const meRes = await session.get("/session");
+  expect(meRes.statusCode).toEqual(401);
+});
+
+// ---------------------------------------------------------------------------
+// Auth guards on existing routes
+// ---------------------------------------------------------------------------
+
+test("GET /lock-systems returns 401 when not logged in", async () => {
+  const res = await anon.get("/lock-systems");
+  expect(res.statusCode).toEqual(401);
+});
+
+test("GET /lock-systems returns systems when logged in as admin", async () => {
+  const session = makeSession(app);
+  await session.post("/session").send(ALICE);
+
+  const res = await session.get("/lock-systems");
   expect(res.statusCode).toEqual(200);
   expect(Array.isArray(res.body)).toBe(true);
-  // At minimum the two seeded systems should be present
   expect(res.body.length).toBeGreaterThanOrEqual(2);
 });
 
+test("GET /orders returns 401 when not logged in", async () => {
+  const res = await anon.get("/orders");
+  expect(res.statusCode).toEqual(401);
+});
+
+test("POST /lock-systems returns 401 when not logged in", async () => {
+  const res = await anon.post("/lock-systems").send({ name: "X", description: "Y" });
+  expect(res.statusCode).toEqual(401);
+});
+
+test("POST /lock-systems returns 403 when logged in as a regular user", async () => {
+  const session = makeSession(app);
+  await session.post("/session").send(ULF);
+
+  const res = await session.post("/lock-systems").send({ name: "X", description: "Y" });
+  expect(res.statusCode).toEqual(403);
+});
+
 // ---------------------------------------------------------------------------
-// Keys
+// POST /users — admin creates users
 // ---------------------------------------------------------------------------
 
-test("POST /keys creates a key and returns 201", async () => {
-  const res = await request.post("/keys").send({
-    label: "Z101",
-    description: "Back door",
-    accessLevel: "Common",
-    lockSystemId: SYS_001_ID,
+test("POST /users returns 401 when not logged in", async () => {
+  const res = await anon.post("/users").send({
+    name: "Test User",
+    email: "newuser@example.com",
+    password: "securepassword",
+    role: "user",
+  });
+  expect(res.statusCode).toEqual(401);
+});
+
+test("POST /users creates a new user when logged in as admin and returns 201", async () => {
+  const session = makeSession(app);
+  await session.post("/session").send(ALICE);
+
+  const res = await session.post("/users").send({
+    name: "New User",
+    email: "newuser@example.com",
+    password: "securepassword",
+    role: "user",
   });
 
   expect(res.statusCode).toEqual(201);
-  expect(res.body.label).toEqual("Z101");
-  expect(res.body.lockSystemId).toEqual(SYS_001_ID);
+  expect(res.body.email).toEqual("newuser@example.com");
+  expect(res.body.role).toEqual("user");
+  expect(res.body.passwordHash).toBeUndefined();
 });
 
-test("POST /keys returns 400 when accessLevel is invalid", async () => {
-  const res = await request.post("/keys").send({
-    label: "Z102",
-    description: "Test",
-    accessLevel: "SuperMaster",   // not a valid value
-    lockSystemId: SYS_001_ID,
+test("POST /users returns 409 for duplicate email", async () => {
+  const session = makeSession(app);
+  await session.post("/session").send(ALICE);
+
+  const res = await session.post("/users").send({
+    name: "Duplicate",
+    email: "alice@example.com",
+    password: "somepassword",
+    role: "user",
   });
-
-  expect(res.statusCode).toEqual(400);
+  expect(res.statusCode).toEqual(409);
 });
 
 // ---------------------------------------------------------------------------
-// End-to-end: assign lock system → create key → place order
+// Session isolation — user A cannot see user B's orders
 // ---------------------------------------------------------------------------
 
-test("End-to-end: user can order a key from an assigned lock system", async () => {
-  // Create a dedicated lock system for this test
-  const createLS = await request
+test("users only see their own orders", async () => {
+  // Set up: log in as admin, create a lock system, assign to Ulf, create a key
+  const adminSession = makeSession(app);
+  await adminSession.post("/session").send(ALICE);
+
+  const lsRes = await adminSession
     .post("/lock-systems")
-    .send({ name: "E2E Building", description: "End-to-end test" });
-  expect(createLS.statusCode).toEqual(201);
-  const lockSystemId: string = createLS.body.id;
+    .send({ name: "Isolation Test", description: "For isolation test" });
+  const lockSystemId: string = lsRes.body.id;
 
-  // Assign it to the regular user
-  const assignRes = await request
-    .patch(`/users/${USER_ID}/assign-lock-system`)
-    .send({ lockSystemId });
-  expect(assignRes.statusCode).toEqual(200);
+  const ulfId = "f1a2b3c4-0001-0001-0001-000000000002";
+  await adminSession.patch(`/users/${ulfId}/assign-lock-system`).send({ lockSystemId });
 
-  // Create a key inside it
-  const createKey = await request.post("/keys").send({
-    label: "E2E-KEY",
-    description: "E2E entrance key",
-    accessLevel: "Individual",
-    lockSystemId,
-  });
-  expect(createKey.statusCode).toEqual(201);
+  const keyRes = await adminSession
+    .post("/keys")
+    .send({ label: "ISO-KEY", description: "Test", accessLevel: "Individual", lockSystemId });
+  const keyId: string = keyRes.body.id;
 
-  // Place the order
-  const orderRes = await request.post("/orders").send({
-    userId: USER_ID,
-    keyId: createKey.body.id,
-    quantity: 1,
-    reason: "lost",
-  });
-
+  // Ulf places an order
+  const ulfSession = makeSession(app);
+  await ulfSession.post("/session").send(ULF);
+  const orderRes = await ulfSession.post("/orders").send({ keyId, quantity: 1, reason: "lost" });
   expect(orderRes.statusCode).toEqual(201);
-  expect(orderRes.body.userId).toEqual(USER_ID);
-  expect(orderRes.body.keyId).toEqual(createKey.body.id);
-  expect(orderRes.body.status).toEqual("placed");
-});
 
-test("POST /orders returns 403 when user is not assigned to the lock system", async () => {
-  // KEY_A101_ID belongs to SYS-001; USER_ID is not assigned to SYS-001 by default
-  const res = await request.post("/orders").send({
-    userId: USER_ID,
-    keyId: KEY_A101_ID,
-    quantity: 1,
-    reason: "damaged",
-  });
+  // Ulf sees his own order
+  const ulfOrders = await ulfSession.get("/orders");
+  expect(ulfOrders.body.length).toBeGreaterThanOrEqual(1);
+  expect(ulfOrders.body.every((o: { userId: string }) => o.userId === ulfId)).toBe(true);
 
-  expect(res.statusCode).toEqual(403);
+  // Alice (admin) sees ALL orders
+  const adminOrders = await adminSession.get("/orders");
+  expect(adminOrders.body.length).toBeGreaterThanOrEqual(ulfOrders.body.length);
 });

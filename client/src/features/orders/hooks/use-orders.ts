@@ -10,9 +10,9 @@ import { Key } from "@/types/key";
 import { getApiError } from "@/lib/utils";
 
 /**
- * Fetch orders. Pass a userId to get only that user's orders; omit for all orders (admin).
+ * Fetch orders for the current session user (admin gets all, user gets own).
  */
-export function useOrders(userId?: string) {
+export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +27,7 @@ export function useOrders(userId?: string) {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await getOrders(userId);
+        const data = await getOrders();
         if (!cancelled) setOrders(data);
       } catch (e) {
         if (!cancelled) setError(getApiError(e, "Failed to fetch orders"));
@@ -38,7 +38,7 @@ export function useOrders(userId?: string) {
 
     fetchOrders();
     return () => { cancelled = true; };
-  }, [userId, tick]);
+  }, [tick]);
 
   return { orders, isLoading, error, refetch };
 }
@@ -61,14 +61,13 @@ export function useAllKeys() {
 }
 
 /**
- * Hook to place an order.
+ * Hook to place an order for the current session user.
  */
 export function usePlaceOrder() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function place(
-    userId: string,
     keyId: string,
     quantity: number,
     reason: OrderReason,
@@ -77,7 +76,7 @@ export function usePlaceOrder() {
     setIsLoading(true);
     setError(null);
     try {
-      await placeOrderApi(userId, keyId, quantity, reason, reasonDetail);
+      await placeOrderApi(keyId, quantity, reason, reasonDetail);
       return true;
     } catch (e) {
       setError(getApiError(e, "Failed to place order"));
