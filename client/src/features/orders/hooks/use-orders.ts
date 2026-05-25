@@ -1,0 +1,115 @@
+import { useCallback, useEffect, useState } from "react";
+import {
+  getOrders,
+  placeOrder as placeOrderApi,
+  updateOrderStatus as updateOrderStatusApi,
+} from "@/api/order";
+import { getAllKeys } from "@/api/lock-systems";
+import { Order, OrderReason, OrderStatus } from "@/types/order";
+import { Key } from "@/types/key";
+import { getApiError } from "@/lib/utils";
+
+/**
+ * Fetch orders. Pass a userId to get only that user's orders; omit for all orders (admin).
+ */
+export function useOrders(userId?: string) {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [tick, setTick] = useState(0);
+
+  const refetch = useCallback(() => setTick((t) => t + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchOrders() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await getOrders(userId);
+        if (!cancelled) setOrders(data);
+      } catch (e) {
+        if (!cancelled) setError(getApiError(e, "Failed to fetch orders"));
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    fetchOrders();
+    return () => { cancelled = true; };
+  }, [userId, tick]);
+
+  return { orders, isLoading, error, refetch };
+}
+
+/**
+ * Fetch all keys (for joining order data with key info).
+ */
+export function useAllKeys() {
+  const [keys, setKeys] = useState<Key[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getAllKeys()
+      .then((data) => { if (!cancelled) setKeys(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  return { keys };
+}
+
+/**
+ * Hook to place an order.
+ */
+export function usePlaceOrder() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function place(
+    userId: string,
+    keyId: string,
+    quantity: number,
+    reason: OrderReason,
+    reasonDetail?: string,
+  ): Promise<boolean> {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await placeOrderApi(userId, keyId, quantity, reason, reasonDetail);
+      return true;
+    } catch (e) {
+      setError(getApiError(e, "Failed to place order"));
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return { place, isLoading, error };
+}
+
+/**
+ * Hook to update an order's status (admin).
+ */
+export function useUpdateOrderStatus() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function updateStatus(orderId: string, status: OrderStatus): Promise<boolean> {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await updateOrderStatusApi(orderId, status);
+      return true;
+    } catch (e) {
+      setError(getApiError(e, "Failed to update order status"));
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return { updateStatus, isLoading, error };
+}
