@@ -69,7 +69,7 @@ export const CreateKeySheet = ({ lockSystemId, onCreated }: Props) => {
           <SheetTitle>Add Key</SheetTitle>
         </SheetHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4">
+        <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="px-4">
           <FieldGroup>
             <Field data-invalid={!!form.formState.errors.label}>
               <FieldLabel htmlFor="label">Label</FieldLabel>
