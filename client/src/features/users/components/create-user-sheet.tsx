@@ -69,7 +69,7 @@ export const CreateUserSheet = ({ onCreated }: Props) => {
           <SheetTitle>Add User</SheetTitle>
         </SheetHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4">
+        <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="px-4">
           <FieldGroup>
             <Field data-invalid={!!form.formState.errors.name}>
               <FieldLabel htmlFor="name">Name</FieldLabel>
