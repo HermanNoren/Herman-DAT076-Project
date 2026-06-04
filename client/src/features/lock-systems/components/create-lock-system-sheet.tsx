@@ -58,7 +58,7 @@ export const CreateLockSystemSheet = ({ onCreated }: Props) => {
           <SheetTitle>Add Lock System</SheetTitle>
         </SheetHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4">
+        <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="px-4">
           <FieldGroup>
             <Field data-invalid={!!form.formState.errors.name}>
               <FieldLabel htmlFor="name">Name</FieldLabel>
