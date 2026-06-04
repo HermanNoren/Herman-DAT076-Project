@@ -8,8 +8,6 @@ import { requireAdmin, requireAuth } from "./auth";
 
 export const lockSystemRouter = express.Router();
 
-// Always DB-backed — under NODE_ENV=test the db instance is an in-process
-// PGlite database (see db/index.ts), so tests exercise these same services.
 export const userService: IUserService = new UserDBService();
 export const lockSystemService: ILockSystemService = new LockSystemDBService();
 
