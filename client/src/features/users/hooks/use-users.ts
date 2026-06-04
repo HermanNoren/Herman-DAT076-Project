@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   getUsers,
   createUser,
@@ -45,6 +45,24 @@ export function useUsers(enabled = true) {
   }, [tick, enabled]);
 
   return { users, isLoading, error, refetch };
+}
+
+/**
+ * Hook to fetch all users grouped by role. (Admin-only endpoint)
+ */
+export function useGroupedUsers() {
+  const { users, isLoading, error, refetch } = useUsers();
+
+  const regularUsers = useMemo(
+    () => users.filter((u) => u.role === "user"),
+    [users],
+  );
+  const admins = useMemo(
+    () => users.filter((u) => u.role === "admin"),
+    [users],
+  );
+
+  return { regularUsers, admins, isLoading, error, refetch };
 }
 
 /**

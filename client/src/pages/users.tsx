@@ -1,22 +1,19 @@
 import { PageHeader } from "@/components/page-header";
 import { AdminList, RegularUserList } from "@/features/users/components/user-list";
 import { CreateUserSheet } from "@/features/users/components/create-user-sheet";
-import { useUsers } from "@/features/users/hooks/use-users";
+import { useGroupedUsers } from "@/features/users/hooks/use-users";
 import { useLockSystems } from "@/features/lock-systems/hooks/use-lock-systems";
 
 export const UsersPage = () => {
-  const { users, refetch: refetchUsers } = useUsers();
+  const { regularUsers, admins, refetch } = useGroupedUsers();
   const { lockSystems } = useLockSystems();
-
-  const regularUsers = users.filter((u) => u.role === "user");
-  const admins = users.filter((u) => u.role === "admin");
 
   return (
     <>
       <PageHeader
         title="Users"
         description="Manage users and their lock system access"
-        action={<CreateUserSheet onCreated={refetchUsers} />}
+        action={<CreateUserSheet onCreated={refetch} />}
       />
 
       <div className="flex flex-col gap-8">
@@ -25,8 +22,8 @@ export const UsersPage = () => {
           <RegularUserList
             users={regularUsers}
             lockSystems={lockSystems}
-            onAssigned={refetchUsers}
-            onDeleted={refetchUsers}
+            onAssigned={refetch}
+            onDeleted={refetch}
           />
         </section>
 

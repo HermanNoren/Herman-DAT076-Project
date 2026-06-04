@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
     "composite": true,
+    // composite projects must emit, but declarations-only keeps tsc from
+    // generating vite.config.js (which would shadow vite.config.ts)
+    "emitDeclarationOnly": true,
     "target": "ES2022",
     "lib": ["ES2023"],
     "module": "ESNext",
