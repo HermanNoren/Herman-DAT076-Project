@@ -1,7 +1,7 @@
 import { KeyRound } from "lucide-react";
 import { LockSystem } from "@/types/lock-system";
 import { Key } from "@/types/key";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/features/auth/context/auth-context";
 import { PlaceOrderSheet } from "@/features/orders/components/place-order-sheet";
 
 type Props = {

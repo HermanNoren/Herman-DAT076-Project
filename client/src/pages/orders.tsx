@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/page-header";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/features/auth/context/auth-context";
 import { useOrders, useAllKeys, useUpdateOrderStatus } from "@/features/orders/hooks/use-orders";
 import { useUsers } from "@/features/users/hooks/use-users";
 import { useLockSystems } from "@/features/lock-systems/hooks/use-lock-systems";

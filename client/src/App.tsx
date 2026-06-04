@@ -5,7 +5,7 @@ import { LockSystemDetailPage } from "./pages/lock-system-detail";
 import { OrdersPage } from "./pages/orders";
 import { UsersPage } from "./pages/users";
 import { LoginPage } from "./pages/login";
-import { AuthProvider, useAuth } from "./context/auth-context";
+import { AuthProvider, useAuth } from "@/features/auth/context/auth-context";
 
 /** Redirects unauthenticated users to /login, shows nothing while loading. */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {

@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/page-header";
 import { useLockSystem, useLockSystemKeys } from "@/features/lock-systems/hooks/use-lock-systems";
 import { LockSystemKeys } from "@/features/lock-systems/components/lock-system-keys";
 import { CreateKeySheet } from "@/features/lock-systems/components/create-key-sheet";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/features/auth/context/auth-context";
 
 export const LockSystemDetailPage = () => {
   const { referenceCode } = useParams<{ referenceCode: string }>();

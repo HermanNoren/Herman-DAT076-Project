@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/page-header";
 import { LockSystemList } from "@/features/lock-systems/components/lock-system-list";
 import { CreateLockSystemSheet } from "@/features/lock-systems/components/create-lock-system-sheet";
 import { useLockSystems, useKeyCountsByLockSystem } from "@/features/lock-systems/hooks/use-lock-systems";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/features/auth/context/auth-context";
 
 export const LockSystemsPage = () => {
   const { user } = useAuth();

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Aperture, KeyRound, ShoppingCart, Users } from "lucide-react";
 import { LucideIcon } from "lucide-react";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/features/auth/context/auth-context";
 
 type NavItem = {
   title: string;
