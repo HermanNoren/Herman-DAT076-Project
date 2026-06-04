@@ -10,17 +10,18 @@ import { User, UserRole } from "@/types/user";
 import { getApiError } from "@/lib/utils";
 
 /**
- * Hook to fetch all users.
+ * Hook to fetch all users. (Admin-only endpoint)
  */
-export function useUsers() {
+export function useUsers(enabled = true) {
   const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
   const refetch = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
 
     async function fetchUsers() {
@@ -41,7 +42,7 @@ export function useUsers() {
     return () => {
       cancelled = true;
     };
-  }, [tick]);
+  }, [tick, enabled]);
 
   return { users, isLoading, error, refetch };
 }
