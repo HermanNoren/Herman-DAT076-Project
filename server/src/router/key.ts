@@ -1,13 +1,14 @@
 import express, { Request, Response } from "express";
 import { AccessLevel, Key } from "../model/key.interface";
-import { KeyService } from "../service/key";
+import { KeyDBService } from "../service/key.db";
+import { IKeyService } from "../service/ikey";
 import { lockSystemService } from "./lock-system";
 import { requireAdmin, requireAuth } from "./auth";
 
 const ACCESS_LEVELS: AccessLevel[] = ["Master", "Individual", "Common"];
 
 export const keyRouter = express.Router();
-export const keyService = new KeyService();
+export const keyService: IKeyService = new KeyDBService();
 
 /** GET /keys?lockSystemId= — returns keys for a lock system, or all keys if no param is given. */
 keyRouter.get(
@@ -49,7 +50,12 @@ keyRouter.post(
     req: Request<
       {},
       {},
-      { label: string; description: string; accessLevel: AccessLevel; lockSystemId: string }
+      {
+        label: string;
+        description: string;
+        accessLevel: AccessLevel;
+        lockSystemId: string;
+      }
     >,
     res: Response<Key | string>,
   ) => {
@@ -64,12 +70,18 @@ keyRouter.post(
         typeof description !== "string" ||
         typeof lockSystemId !== "string"
       ) {
-        res.status(400).send("Fields 'label', 'description' and 'lockSystemId' are invalid");
+        res
+          .status(400)
+          .send("Fields 'label', 'description' and 'lockSystemId' are invalid");
         return;
       }
 
       if (!ACCESS_LEVELS.includes(accessLevel)) {
-        res.status(400).send(`Field 'accessLevel' must be one of: ${ACCESS_LEVELS.join(", ")}`);
+        res
+          .status(400)
+          .send(
+            `Field 'accessLevel' must be one of: ${ACCESS_LEVELS.join(", ")}`,
+          );
         return;
       }
 
@@ -79,10 +91,19 @@ keyRouter.post(
         return;
       }
 
-      const key = await keyService.addKey(label, description, accessLevel, lockSystemId);
+      const key = await keyService.addKey(
+        label,
+        description,
+        accessLevel,
+        lockSystemId,
+      );
 
       if (key === "DUPLICATE_LABEL") {
-        res.status(409).send(`A key with label '${label}' already exists in this lock system`);
+        res
+          .status(409)
+          .send(
+            `A key with label '${label}' already exists in this lock system`,
+          );
         return;
       }
 

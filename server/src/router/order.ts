@@ -1,40 +1,54 @@
 import express, { Request, Response } from "express";
 import { Order, OrderReason, OrderStatus } from "../model/order.interface";
-import { OrderService } from "../service/order";
+import { OrderDBService } from "../service/order.db";
+import { IOrderService } from "../service/iorder";
 import { userService } from "./lock-system";
 import { keyService } from "./key";
 import { requireAdmin, requireAuth } from "./auth";
 
 export const orderRouter = express.Router();
-export const orderService = new OrderService();
+export const orderService: IOrderService = new OrderDBService();
 
-const ORDER_REASONS: OrderReason[] = ["lost", "damaged", "additional_copy", "stolen", "other"];
+const ORDER_REASONS: OrderReason[] = [
+  "lost",
+  "damaged",
+  "additional_copy",
+  "stolen",
+  "other",
+];
 const ORDER_STATUSES: OrderStatus[] = ["placed", "ready", "collected"];
 
 /** GET /orders — returns all orders (admin) or only the logged-in user's orders (user). */
-orderRouter.get(
-  "/",
-  async (req: Request, res: Response<Order[] | string>) => {
-    try {
-      const user = await requireAuth(req, res);
-      if (!user) return;
+orderRouter.get("/", async (req: Request, res: Response<Order[] | string>) => {
+  try {
+    const user = await requireAuth(req, res);
+    if (!user) return;
 
-      const orders = user.role === "admin"
+    const orders =
+      user.role === "admin"
         ? await orderService.getOrders()
         : await orderService.getOrdersByUser(user.id);
 
-      res.status(200).send(orders);
-    } catch (e: any) {
-      res.status(500).send(e.message);
-    }
-  },
-);
+    res.status(200).send(orders);
+  } catch (e: any) {
+    res.status(500).send(e.message);
+  }
+});
 
 /** POST /orders — places a new key order for the logged-in user. */
 orderRouter.post(
   "/",
   async (
-    req: Request<{}, {}, { keyId: string; quantity: number; reason: OrderReason; reasonDetail?: string }>,
+    req: Request<
+      {},
+      {},
+      {
+        keyId: string;
+        quantity: number;
+        reason: OrderReason;
+        reasonDetail?: string;
+      }
+    >,
     res: Response<Order | string>,
   ) => {
     try {
@@ -48,18 +62,29 @@ orderRouter.post(
         return;
       }
 
-      if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1) {
+      if (
+        typeof quantity !== "number" ||
+        !Number.isInteger(quantity) ||
+        quantity < 1
+      ) {
         res.status(400).send("Field 'quantity' must be a positive integer");
         return;
       }
 
       if (!ORDER_REASONS.includes(reason)) {
-        res.status(400).send(`Field 'reason' must be one of: ${ORDER_REASONS.join(", ")}`);
+        res
+          .status(400)
+          .send(`Field 'reason' must be one of: ${ORDER_REASONS.join(", ")}`);
         return;
       }
 
-      if (reason === "other" && (!reasonDetail || typeof reasonDetail !== "string")) {
-        res.status(400).send("Field 'reasonDetail' is required when reason is 'other'");
+      if (
+        reason === "other" &&
+        (!reasonDetail || typeof reasonDetail !== "string")
+      ) {
+        res
+          .status(400)
+          .send("Field 'reasonDetail' is required when reason is 'other'");
         return;
       }
 
@@ -109,11 +134,16 @@ orderRouter.patch(
       const { status } = req.body;
 
       if (!ORDER_STATUSES.includes(status)) {
-        res.status(400).send(`Field 'status' must be one of: ${ORDER_STATUSES.join(", ")}`);
+        res
+          .status(400)
+          .send(`Field 'status' must be one of: ${ORDER_STATUSES.join(", ")}`);
         return;
       }
 
-      const result = await orderService.updateOrderStatus(req.params.id, status);
+      const result = await orderService.updateOrderStatus(
+        req.params.id,
+        status,
+      );
 
       if (result === "NOT_FOUND") {
         res.status(404).send("Order not found");

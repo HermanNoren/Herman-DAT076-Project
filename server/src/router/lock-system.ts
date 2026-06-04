@@ -1,13 +1,17 @@
 import express, { Request, Response } from "express";
-import { LockSystemService } from "../service/lock-system";
-import { UserService } from "../service/user";
+import { LockSystemDBService } from "../service/lock-system.db";
+import { UserDBService } from "../service/user.db";
+import { ILockSystemService } from "../service/ilock-system";
+import { IUserService } from "../service/iuser";
 import { LockSystem } from "../model/lock-system.interface";
 import { requireAdmin, requireAuth } from "./auth";
 
 export const lockSystemRouter = express.Router();
 
-export const userService = new UserService();
-export const lockSystemService = new LockSystemService();
+// Always DB-backed — under NODE_ENV=test the db instance is an in-process
+// PGlite database (see db/index.ts), so tests exercise these same services.
+export const userService: IUserService = new UserDBService();
+export const lockSystemService: ILockSystemService = new LockSystemDBService();
 
 /** GET /lock-systems — returns all systems visible to the logged-in user (all for admin, assigned-only for users). */
 lockSystemRouter.get(
@@ -17,8 +21,10 @@ lockSystemRouter.get(
       const user = await requireAuth(req, res);
       if (!user) return;
 
-      const systems = await lockSystemService.getVisibleForUser(user.id, userService);
-      res.status(200).send(systems ?? []);
+      const assignedIds =
+        user.role === "admin" ? ("ALL" as const) : user.assignedLockSystemIds;
+      const systems = await lockSystemService.getVisibleForUser(assignedIds);
+      res.status(200).send(systems);
     } catch (e: any) {
       res.status(500).send(e.message);
     }
@@ -28,12 +34,17 @@ lockSystemRouter.get(
 /** GET /lock-systems/:referenceCode — returns a single lock system by reference code. */
 lockSystemRouter.get(
   "/:referenceCode",
-  async (req: Request<{ referenceCode: string }>, res: Response<LockSystem | string>) => {
+  async (
+    req: Request<{ referenceCode: string }>,
+    res: Response<LockSystem | string>,
+  ) => {
     try {
       const user = await requireAuth(req, res);
       if (!user) return;
 
-      const system = await lockSystemService.getByReferenceCode(req.params.referenceCode);
+      const system = await lockSystemService.getByReferenceCode(
+        req.params.referenceCode,
+      );
       if (!system) {
         res.status(404).send("Lock system not found");
         return;

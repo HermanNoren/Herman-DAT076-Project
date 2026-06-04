@@ -1,7 +1,8 @@
 import { randomUUID } from "crypto";
 import { AccessLevel, Key } from "../model/key.interface";
+import { IKeyService } from "./ikey";
 
-export class KeyService {
+export class KeyService implements IKeyService {
   private keys: Key[] = [
     {
       id: "e1f2a3b4-0001-0001-0001-000000000001",
@@ -45,7 +46,10 @@ export class KeyService {
   }
 
   /** Returns a key by its label within a specific lock system, or undefined if not found. */
-  async getKeyByLabel(label: string, lockSystemId: string): Promise<Key | undefined> {
+  async getKeyByLabel(
+    label: string,
+    lockSystemId: string,
+  ): Promise<Key | undefined> {
     const key = this.keys.find(
       (k) => k.label === label && k.lockSystemId === lockSystemId,
     );

@@ -1,22 +1,39 @@
+import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { db } from "../../db";
+import { orders, type Order as OrderRow } from "../../db/schema";
 import { Order, OrderReason, OrderStatus } from "../model/order.interface";
 import { IOrderService } from "./iorder";
 import { IUserService } from "./iuser";
 import { IKeyService } from "./ikey";
 
-export class OrderService implements IOrderService {
-  private orders: Order[] = [];
+/** Maps an orders row to the API shape — Date → ISO string, null → omitted. */
+function rowToOrder(row: OrderRow): Order {
+  return {
+    id: row.id,
+    userId: row.userId,
+    keyId: row.keyId,
+    quantity: row.quantity,
+    reason: row.reason,
+    ...(row.reasonDetail != null && { reasonDetail: row.reasonDetail }),
+    status: row.status,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
 
+export class OrderDBService implements IOrderService {
   /** Returns all orders. */
   async getOrders(): Promise<Order[]> {
-    return JSON.parse(JSON.stringify(this.orders));
+    return (await db.select().from(orders)).map(rowToOrder);
   }
 
   /** Returns all orders placed by the given user. */
   async getOrdersByUser(userId: string): Promise<Order[]> {
-    return this.orders
-      .filter((o) => o.userId === userId)
-      .map((o) => ({ ...o }));
+    const rows = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.userId, userId));
+    return rows.map(rowToOrder);
   }
 
   /**
@@ -45,19 +62,21 @@ export class OrderService implements IOrderService {
       return "FORBIDDEN";
     }
 
-    const order: Order = {
-      id: randomUUID(),
-      userId,
-      keyId,
-      quantity,
-      reason,
-      ...(reasonDetail !== undefined && { reasonDetail }),
-      status: "placed",
-      createdAt: new Date().toISOString(),
-    };
-
-    this.orders.push(order);
-    return { ...order };
+    const [row] = await db
+      .insert(orders)
+      .values({
+        id: randomUUID(),
+        userId,
+        keyId,
+        quantity,
+        reason,
+        reasonDetail: reasonDetail ?? null,
+        status: "placed",
+        // createdAt/updatedAt are filled by the DB defaults
+      })
+      .returning();
+    if (!row) throw new Error("Insert returned no row");
+    return rowToOrder(row);
   }
 
   /** Updates the status of an existing order. Returns "NOT_FOUND" if the order does not exist. */
@@ -65,9 +84,12 @@ export class OrderService implements IOrderService {
     orderId: string,
     status: OrderStatus,
   ): Promise<Order | "NOT_FOUND"> {
-    const order = this.orders.find((o) => o.id === orderId);
-    if (!order) return "NOT_FOUND";
-    order.status = status;
-    return { ...order };
+    const [row] = await db
+      .update(orders)
+      .set({ status })
+      .where(eq(orders.id, orderId))
+      .returning();
+    if (!row) return "NOT_FOUND";
+    return rowToOrder(row);
   }
 }

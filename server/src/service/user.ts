@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import bcrypt from "bcrypt";
 import { User, UserPublic, UserRole } from "../model/user.interface";
+import { IUserService } from "./iuser";
 
 const SALT_ROUNDS = 10;
 
@@ -9,7 +10,7 @@ function toPublic(user: User): UserPublic {
   return pub;
 }
 
-export class UserService {
+export class UserService implements IUserService {
   private users: User[] = [
     {
       id: "f1a2b3c4-0001-0001-0001-000000000001",
@@ -81,8 +82,9 @@ export class UserService {
    */
   async deleteUser(id: string): Promise<"OK" | "NOT_FOUND" | "FORBIDDEN"> {
     const index = this.users.findIndex((u) => u.id === id);
-    if (index === -1) return "NOT_FOUND";
-    if (this.users[index].role === "admin") return "FORBIDDEN";
+    const user = this.users[index];
+    if (index === -1 || !user) return "NOT_FOUND";
+    if (user.role === "admin") return "FORBIDDEN";
     this.users.splice(index, 1);
     return "OK";
   }

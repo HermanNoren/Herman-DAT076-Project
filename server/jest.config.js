@@ -8,4 +8,6 @@ module.exports = {
   transform: {
     ...tsJestTransformCfg,
   },
+  // Migrates + seeds each test file's PGlite instance before its tests run.
+  setupFilesAfterEnv: ["<rootDir>/src/test-setup.ts"],
 };
