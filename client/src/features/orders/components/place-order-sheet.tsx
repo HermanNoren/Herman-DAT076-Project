@@ -98,7 +98,7 @@ export const PlaceOrderSheet = ({ keyItem, lockSystem }: Props) => {
           </SheetDescription>
         </SheetHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="px-4">
+        <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="px-4">
           <FieldGroup>
             <Field data-invalid={!!form.formState.errors.quantity}>
               <FieldLabel htmlFor="quantity">Quantity</FieldLabel>

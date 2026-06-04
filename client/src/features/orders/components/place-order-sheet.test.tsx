@@ -70,6 +70,40 @@ describe('PlaceOrderSheet', () => {
     expect(screen.queryByLabelText('Please specify')).not.toBeInTheDocument();
   });
 
+  test('submits the order with the entered quantity and default reason', async () => {
+    const mockPlace = jest.fn().mockResolvedValue(true);
+    jest.mocked(usePlaceOrder).mockReturnValue({
+      place: mockPlace,
+      isLoading: false,
+      error: null,
+    });
+
+    renderSheet();
+    fireEvent.click(screen.getByRole('button', { name: /Order/i }));
+    await waitFor(() => screen.getByLabelText('Quantity'));
+
+    fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '3' } });
+    fireEvent.click(screen.getByRole('button', { name: /Place Order/i }));
+
+    await waitFor(() => {
+      // reason defaults to "lost"; reasonDetail is only sent for "other"
+      expect(mockPlace).toHaveBeenCalledWith(MOCK_KEY.id, 3, 'lost', undefined);
+    });
+  });
+
+  test('shows a validation error for a quantity below 1', async () => {
+    renderSheet();
+    fireEvent.click(screen.getByRole('button', { name: /Order/i }));
+    await waitFor(() => screen.getByLabelText('Quantity'));
+
+    fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '0' } });
+    fireEvent.click(screen.getByRole('button', { name: /Place Order/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('At least 1')).toBeInTheDocument();
+    });
+  });
+
   test('shows an API error message when placing the order fails', async () => {
     jest.mocked(usePlaceOrder).mockReturnValue({
       place: jest.fn().mockResolvedValue(false),
