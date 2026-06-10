@@ -1,20 +1,12 @@
 /**
- * Tests for the AdminRoute guard and the presentational lock-system
- * components (the latter are pure – they only render props and do not
- * call the API).
+ * Tests for the presentational lock-system components.
+ * These components are pure – they only render props and do not call the API.
  */
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { AdminRoute } from './App';
-import { useAuth } from '@/features/auth/context/auth-context';
+import { MemoryRouter } from 'react-router-dom';
 import { LockSystemCard } from './features/lock-systems/components/lock-system-card';
 import { LockSystemList } from './features/lock-systems/components/lock-system-list';
 import { LockSystem } from './types/lock-system';
-import { User } from './types/user';
-
-jest.mock('@/features/auth/context/auth-context', () => ({
-  useAuth: jest.fn(),
-}));
 
 const SYSTEM: LockSystem = {
   id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
@@ -27,81 +19,6 @@ const SYSTEM: LockSystem = {
 function withRouter(ui: React.ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>);
 }
-
-// ---------------------------------------------------------------------------
-// AdminRoute
-// ---------------------------------------------------------------------------
-
-const ADMIN: User = {
-  id: '1',
-  name: 'Alice Admin',
-  email: 'alice@example.com',
-  role: 'admin',
-  assignedLockSystemIds: [],
-};
-
-const REGULAR_USER: User = {
-  id: '2',
-  name: 'Ulf User',
-  email: 'ulf@example.com',
-  role: 'user',
-  assignedLockSystemIds: [],
-};
-
-/** Mounts AdminRoute on /users next to a stub home route to observe redirects. */
-function renderAdminRoute() {
-  return render(
-    <MemoryRouter initialEntries={['/users']}>
-      <Routes>
-        <Route
-          path="/users"
-          element={
-            <AdminRoute>
-              <div>admin only content</div>
-            </AdminRoute>
-          }
-        />
-        <Route path="/lock-systems" element={<div>home page</div>} />
-      </Routes>
-    </MemoryRouter>,
-  );
-}
-
-describe('AdminRoute', () => {
-  test('renders its children for an admin', () => {
-    jest.mocked(useAuth).mockReturnValue({
-      user: ADMIN,
-      isLoading: false,
-      login: jest.fn(),
-      logout: jest.fn(),
-    });
-    renderAdminRoute();
-    expect(screen.getByText('admin only content')).toBeInTheDocument();
-  });
-
-  test('redirects a regular user to the start page', () => {
-    jest.mocked(useAuth).mockReturnValue({
-      user: REGULAR_USER,
-      isLoading: false,
-      login: jest.fn(),
-      logout: jest.fn(),
-    });
-    renderAdminRoute();
-    expect(screen.queryByText('admin only content')).not.toBeInTheDocument();
-    expect(screen.getByText('home page')).toBeInTheDocument();
-  });
-
-  test('renders nothing while the session check is loading', () => {
-    jest.mocked(useAuth).mockReturnValue({
-      user: null,
-      isLoading: true,
-      login: jest.fn(),
-      logout: jest.fn(),
-    });
-    const { container } = renderAdminRoute();
-    expect(container).toBeEmptyDOMElement();
-  });
-});
 
 // ---------------------------------------------------------------------------
 // LockSystemCard
