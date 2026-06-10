@@ -16,7 +16,7 @@ const NONEXISTENT_ID = "00000000-0000-0000-0000-000000000000";
 
 const userService = new UserDBService();
 const keyService = new KeyDBService();
-const orderService = new OrderDBService();
+const orderService = new OrderDBService(userService, keyService);
 
 describe("OrderDBService", () => {
   test("admin user can place an order for any key", async () => {
@@ -25,7 +25,7 @@ describe("OrderDBService", () => {
     if (key === "DUPLICATE_LABEL") return;
 
     const result = await orderService.placeOrder(
-      ADMIN_ID, key.id, 2, "lost", undefined, userService, keyService,
+      ADMIN_ID, key.id, 2, "lost", undefined,
     );
 
     expect(typeof result).toBe("object");
@@ -44,7 +44,7 @@ describe("OrderDBService", () => {
     if (key === "DUPLICATE_LABEL") return;
 
     const result = await orderService.placeOrder(
-      USER_ID, key.id, 1, "damaged", undefined, userService, keyService,
+      USER_ID, key.id, 1, "damaged", undefined,
     );
 
     expect(result).toBe("FORBIDDEN");
@@ -57,7 +57,7 @@ describe("OrderDBService", () => {
     if (key === "DUPLICATE_LABEL") return;
 
     const result = await orderService.placeOrder(
-      NONEXISTENT_ID, key.id, 1, "lost", undefined, userService, keyService,
+      NONEXISTENT_ID, key.id, 1, "lost", undefined,
     );
 
     expect(result).toBe("USER_NOT_FOUND");
@@ -65,7 +65,7 @@ describe("OrderDBService", () => {
 
   test("returns KEY_NOT_FOUND for a non-existent keyId", async () => {
     const result = await orderService.placeOrder(
-      ADMIN_ID, NONEXISTENT_ID, 1, "lost", undefined, userService, keyService,
+      ADMIN_ID, NONEXISTENT_ID, 1, "lost", undefined,
     );
 
     expect(result).toBe("KEY_NOT_FOUND");

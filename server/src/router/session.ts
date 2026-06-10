@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { UserPublic } from "../model/user.interface";
-import { userService } from "./lock-system";
+import { userService } from "../service";
 
 /** Routes for logging in, logging out and inspecting the current session. */
 export const sessionRouter = express.Router();

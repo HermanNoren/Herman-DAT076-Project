@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { userService, lockSystemService } from "./lock-system";
+import { userService, lockSystemService } from "../service";
 import { UserPublic, UserRole } from "../model/user.interface";
 import { requireAdmin } from "./auth";
 

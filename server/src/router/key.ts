@@ -1,8 +1,6 @@
 import express, { Request, Response } from "express";
 import { AccessLevel, Key } from "../model/key.interface";
-import { KeyDBService } from "../service/key.db";
-import { IKeyService } from "../service/ikey";
-import { lockSystemService } from "./lock-system";
+import { keyService, lockSystemService } from "../service";
 import { requireAdmin, requireAuth } from "./auth";
 
 /** Access levels accepted by `POST /keys`, used to validate the request body. */
@@ -10,9 +8,6 @@ const ACCESS_LEVELS: AccessLevel[] = ["Master", "Individual", "Common"];
 
 /** Routes for listing and creating keys. */
 export const keyRouter = express.Router();
-
-/** Shared key service instance, also used by the order router. */
-export const keyService: IKeyService = new KeyDBService();
 
 /**
  * `GET /keys?lockSystemId=` — lists keys, optionally for one lock system.

@@ -1,16 +1,10 @@
 import express, { Request, Response } from "express";
 import { Order, OrderReason, OrderStatus } from "../model/order.interface";
-import { OrderDBService } from "../service/order.db";
-import { IOrderService } from "../service/iorder";
-import { userService } from "./lock-system";
-import { keyService } from "./key";
+import { orderService } from "../service";
 import { requireAdmin, requireAuth } from "./auth";
 
 /** Routes for placing orders and managing their status. */
 export const orderRouter = express.Router();
-
-/** Shared order service instance. */
-export const orderService: IOrderService = new OrderDBService();
 
 /** Reasons accepted by `POST /orders`, used to validate the request body. */
 const ORDER_REASONS: OrderReason[] = [
@@ -116,8 +110,6 @@ orderRouter.post(
         quantity,
         reason,
         reasonDetail,
-        userService,
-        keyService,
       );
 
       if (result === "USER_NOT_FOUND") {

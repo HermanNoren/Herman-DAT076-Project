@@ -1,21 +1,10 @@
 import express, { Request, Response } from "express";
-import { LockSystemDBService } from "../service/lock-system.db";
-import { UserDBService } from "../service/user.db";
-import { ILockSystemService } from "../service/ilock-system";
-import { IUserService } from "../service/iuser";
+import { lockSystemService } from "../service";
 import { LockSystem } from "../model/lock-system.interface";
 import { requireAdmin, requireAuth } from "./auth";
 
 /** Routes for listing and creating lock systems. */
 export const lockSystemRouter = express.Router();
-
-/**
- * Shared service instances. This module acts as the composition root:
- * the session, user, order and auth modules import these singletons
- * instead of constructing their own.
- */
-export const userService: IUserService = new UserDBService();
-export const lockSystemService: ILockSystemService = new LockSystemDBService();
 
 /**
  * `GET /lock-systems` — lists the lock systems visible to the logged-in

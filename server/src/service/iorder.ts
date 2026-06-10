@@ -1,6 +1,4 @@
 import { Order, OrderReason, OrderStatus } from "../model/order.interface";
-import { IUserService } from "./iuser";
-import { IKeyService } from "./ikey";
 
 /** Manages key orders: placement by users and status updates by admins. */
 export interface IOrderService {
@@ -29,8 +27,6 @@ export interface IOrderService {
    * @param quantity - Number of copies. Must be a positive integer.
    * @param reason - Why the key is needed.
    * @param reasonDetail - Free-text explanation; required when `reason` is "other".
-   * @param userService - Used to look up the ordering user and their assignments.
-   * @param keyService - Used to look up the ordered key.
    * @returns The created order, or `"USER_NOT_FOUND"` / `"KEY_NOT_FOUND"` if
    *   either does not exist, or `"FORBIDDEN"` if the user is not assigned to
    *   the key's lock system.
@@ -41,8 +37,6 @@ export interface IOrderService {
     quantity: number,
     reason: OrderReason,
     reasonDetail: string | undefined,
-    userService: IUserService,
-    keyService: IKeyService,
   ): Promise<Order | "USER_NOT_FOUND" | "KEY_NOT_FOUND" | "FORBIDDEN">;
 
   /**

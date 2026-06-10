@@ -26,6 +26,15 @@ function rowToOrder(row: OrderRow): Order {
  * interface for the full contract of each method.
  */
 export class OrderDBService implements IOrderService {
+  /**
+   * @param userService - Used to look up the ordering user and their assignments.
+   * @param keyService - Used to look up the ordered key.
+   */
+  constructor(
+    private readonly userService: IUserService,
+    private readonly keyService: IKeyService,
+  ) {}
+
   /** Returns all orders. */
   async getOrders(): Promise<Order[]> {
     return (await db.select().from(orders)).map(rowToOrder);
@@ -50,13 +59,11 @@ export class OrderDBService implements IOrderService {
     quantity: number,
     reason: OrderReason,
     reasonDetail: string | undefined,
-    userService: IUserService,
-    keyService: IKeyService,
   ): Promise<Order | "USER_NOT_FOUND" | "KEY_NOT_FOUND" | "FORBIDDEN"> {
-    const user = await userService.getUserById(userId);
+    const user = await this.userService.getUserById(userId);
     if (!user) return "USER_NOT_FOUND";
 
-    const key = await keyService.getKeyById(keyId);
+    const key = await this.keyService.getKeyById(keyId);
     if (!key) return "KEY_NOT_FOUND";
 
     if (

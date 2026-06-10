@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { UserPublic } from "../model/user.interface";
-import { userService } from "./lock-system";
+import { userService } from "../service";
 
 /**
  * Resolves the current session to a logged-in user.
