@@ -20,8 +20,22 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 /**
+ * Gate for admin-only routes: renders nothing while the session check is
+ * loading, redirects regular users to the app's start page, otherwise
+ * renders its children. Logged-out users are handled by the surrounding
+ * {@link ProtectedRoute}.
+ */
+export function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (user?.role !== "admin") return <Navigate to="/lock-systems" replace />;
+  return <>{children}</>;
+}
+
+/**
  * Route table. `/login` is public; everything else is wrapped in
  * {@link ProtectedRoute} and rendered inside the {@link AppLayout} shell.
+ * `/users` additionally requires the admin role via {@link AdminRoute}.
  */
 function AppRoutes() {
   return (
@@ -38,7 +52,14 @@ function AppRoutes() {
         <Route path="lock-systems" element={<LockSystemsPage />} />
         <Route path="lock-systems/:referenceCode" element={<LockSystemDetailPage />} />
         <Route path="orders" element={<OrdersPage />} />
-        <Route path="users" element={<UsersPage />} />
+        <Route
+          path="users"
+          element={
+            <AdminRoute>
+              <UsersPage />
+            </AdminRoute>
+          }
+        />
       </Route>
     </Routes>
   );
