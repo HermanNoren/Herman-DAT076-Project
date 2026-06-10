@@ -2,9 +2,18 @@ import express, { Request, Response } from "express";
 import { UserPublic } from "../model/user.interface";
 import { userService } from "./lock-system";
 
+/** Routes for logging in, logging out and inspecting the current session. */
 export const sessionRouter = express.Router();
 
-/** POST /session — log in with email + password. Sets session and returns the logged-in user. */
+/**
+ * `POST /session` — logs in with email and password.
+ *
+ * No authentication required (this is how a session is obtained).
+ * Body: `{ email: string, password: string }`.
+ *
+ * Responses: 200 with the logged-in user (and a session cookie),
+ * 400 if the body is malformed, 401 if the credentials are wrong.
+ */
 sessionRouter.post(
   "/",
   async (
@@ -34,7 +43,12 @@ sessionRouter.post(
   },
 );
 
-/** DELETE /session — log out. Destroys the session. */
+/**
+ * `DELETE /session` — logs out by destroying the session.
+ *
+ * Responses: 204 on success (also for callers who were never logged in),
+ * 500 if the session store fails.
+ */
 sessionRouter.delete(
   "/",
   (req: Request, res: Response<string>) => {
@@ -48,7 +62,13 @@ sessionRouter.delete(
   },
 );
 
-/** GET /session — returns the currently logged-in user, or 401 if not logged in. */
+/**
+ * `GET /session` — returns the currently logged-in user.
+ *
+ * Used by the client on startup to restore an existing session.
+ *
+ * Responses: 200 with the user, 401 if no valid session exists.
+ */
 sessionRouter.get(
   "/",
   async (req: Request, res: Response<UserPublic | string>) => {

@@ -10,16 +10,24 @@ import {
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
 
+/** Display labels for known URL segments; unknown segments (e.g. "SYS-001") are shown as-is. */
 const routeLabels: Record<string, string> = {
   "lock-systems": "Lock Systems",
   orders: "Orders",
   users: "Users",
 };
 
+/**
+ * Maps a URL segment to its breadcrumb label.
+ *
+ * @param segment - One path segment, e.g. "orders" or "SYS-001".
+ * @returns The label to render in the breadcrumb.
+ */
 function segmentLabel(segment: string): string {
   return routeLabels[segment] ?? segment;
 }
 
+/** Top bar with the sidebar toggle and breadcrumbs derived from the current URL. */
 export const AppHeader = () => {
   const { pathname } = useLocation();
 

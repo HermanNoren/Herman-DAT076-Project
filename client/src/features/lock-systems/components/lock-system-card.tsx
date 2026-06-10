@@ -3,10 +3,13 @@ import { ChevronRight, KeyRound } from "lucide-react";
 import { Link } from "react-router-dom";
 
 type Props = {
+  /** The lock system to display. */
   lockSystem: LockSystem;
+  /** Number of keys in the system; "—" is shown while it is unknown. */
   keyCount?: number;
 };
 
+/** Card linking to a lock system's detail page, with name, code and key count. */
 export const LockSystemCard = ({ lockSystem, keyCount }: Props) => {
   const keyLabel =
     keyCount === undefined ? "—" : `${keyCount} ${keyCount === 1 ? "key" : "keys"}`;

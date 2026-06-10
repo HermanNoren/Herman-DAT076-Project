@@ -5,6 +5,10 @@ import { keys } from "../../db/schema";
 import { AccessLevel, Key } from "../model/key.interface";
 import { IKeyService } from "./ikey";
 
+/**
+ * {@link IKeyService} backed by the `keys` table via Drizzle. See the
+ * interface for the full contract of each method.
+ */
 export class KeyDBService implements IKeyService {
   /** Returns all keys across all lock systems. */
   async getKeys(): Promise<Key[]> {

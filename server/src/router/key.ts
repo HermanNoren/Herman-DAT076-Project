@@ -5,12 +5,23 @@ import { IKeyService } from "../service/ikey";
 import { lockSystemService } from "./lock-system";
 import { requireAdmin, requireAuth } from "./auth";
 
+/** Access levels accepted by `POST /keys`, used to validate the request body. */
 const ACCESS_LEVELS: AccessLevel[] = ["Master", "Individual", "Common"];
 
+/** Routes for listing and creating keys. */
 export const keyRouter = express.Router();
+
+/** Shared key service instance, also used by the order router. */
 export const keyService: IKeyService = new KeyDBService();
 
-/** GET /keys?lockSystemId= — returns keys for a lock system, or all keys if no param is given. */
+/**
+ * `GET /keys?lockSystemId=` — lists keys, optionally for one lock system.
+ *
+ * Requires a logged-in user.
+ *
+ * Responses: 200 with the keys (all keys when `lockSystemId` is omitted),
+ * 401 if not logged in, 404 if the given lock system does not exist.
+ */
 keyRouter.get(
   "/",
   async (
@@ -43,7 +54,16 @@ keyRouter.get(
   },
 );
 
-/** POST /keys — creates a new key inside a lock system. Admin only. */
+/**
+ * `POST /keys` — creates a new key inside a lock system. Admin only.
+ *
+ * Body: `{ label: string, description: string, accessLevel: AccessLevel,
+ * lockSystemId: string }`.
+ *
+ * Responses: 201 with the created key, 400 if a field is invalid,
+ * 401/403 if not logged in as an admin, 404 if the lock system does not
+ * exist, 409 if the label is already used in that lock system.
+ */
 keyRouter.post(
   "/",
   async (

@@ -35,9 +35,15 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 type Props = {
+  /** Called after a successful creation so the parent can refetch its list. */
   onCreated: () => void;
 };
 
+/**
+ * "Add User" button that opens a slide-over form for creating a user
+ * account (name, email, password and role). Admins set all credentials —
+ * there is no self-registration.
+ */
 export const CreateUserSheet = ({ onCreated }: Props) => {
   const [open, setOpen] = useState(false);
   const { create, isLoading, error } = useCreateUser();

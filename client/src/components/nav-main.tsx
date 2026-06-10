@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { LucideIcon } from "lucide-react";
 
+/** Sidebar navigation links, highlighting the one matching the current route. */
 export const NavMain = ({
   items,
 }: {

@@ -1,5 +1,12 @@
 import axios from "axios";
 
+/**
+ * Shared Axios instance for all API calls.
+ *
+ * `withCredentials` makes the browser attach the session cookie to every
+ * request, which is how the server identifies the logged-in user — the
+ * client never sends user identity in bodies or query params.
+ */
 export const api = axios.create({
   baseURL: "http://localhost:8080",
   withCredentials: true,

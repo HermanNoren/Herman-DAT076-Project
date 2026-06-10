@@ -11,10 +11,16 @@ import { useUpdateOrderStatus } from "../hooks/use-orders";
 import { REASON_LABELS, STATUS_LABELS, ORDER_STATUSES } from "../lib/order-labels";
 
 type Props = {
+  /** Orders joined with their display data. */
   rows: OrderRow[];
+  /** Called after a successful status update so the parent can refetch. */
   onStatusChanged: () => void;
 };
 
+/**
+ * Admin view of all orders: a table showing who ordered what, with a
+ * dropdown per row to advance the order status.
+ */
 export const AdminOrderList = ({ rows, onStatusChanged }: Props) => {
   const { updateStatus } = useUpdateOrderStatus();
 

@@ -11,12 +11,14 @@ import {
 import { users } from "./user.db";
 import { keys } from "./key.db";
 
+/** Postgres enum mirroring the `OrderStatus` model type. */
 export const orderStatus = pgEnum("order_status", [
   "placed",
   "ready",
   "collected",
 ]);
 
+/** Postgres enum mirroring the `OrderReason` model type. */
 export const orderReason = pgEnum("order_reason", [
   "lost",
   "damaged",
@@ -25,6 +27,10 @@ export const orderReason = pgEnum("order_reason", [
   "other",
 ]);
 
+/**
+ * Key orders. A check constraint enforces a positive quantity; orders are
+ * deleted with their user (cascade) but block deletion of their key.
+ */
 export const orders = pgTable(
   "orders",
   {
@@ -48,5 +54,7 @@ export const orders = pgTable(
   (t) => [check("orders_quantity_positive", sql`${t.quantity} > 0`)],
 );
 
+/** A row of the `orders` table (`createdAt` is a `Date`, unlike the API model). */
 export type Order = InferSelectModel<typeof orders>;
+/** Insert shape for the `orders` table. */
 export type NewOrder = InferInsertModel<typeof orders>;

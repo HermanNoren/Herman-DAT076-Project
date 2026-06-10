@@ -10,7 +10,12 @@ import { User, UserRole } from "@/types/user";
 import { getApiError } from "@/lib/utils";
 
 /**
- * Hook to fetch all users. (Admin-only endpoint)
+ * Fetches all users (admin-only endpoint).
+ *
+ * @param enabled - When `false`, no request is made at all. Used by
+ *   non-admin views that must not call the admin-only endpoint.
+ * @returns `users` — the fetched users; `isLoading` and `error` — request
+ *   state; `refetch` — runs the fetch again.
  */
 export function useUsers(enabled = true) {
   const [users, setUsers] = useState<User[]>([]);
@@ -48,7 +53,10 @@ export function useUsers(enabled = true) {
 }
 
 /**
- * Hook to fetch all users grouped by role. (Admin-only endpoint)
+ * Fetches all users and splits them by role (admin-only endpoint).
+ *
+ * @returns `regularUsers` and `admins` — the users grouped by role;
+ *   `isLoading` and `error` — request state; `refetch` — runs the fetch again.
  */
 export function useGroupedUsers() {
   const { users, isLoading, error, refetch } = useUsers();
@@ -66,7 +74,10 @@ export function useGroupedUsers() {
 }
 
 /**
- * Hook to create a new user.
+ * Creates a new user account (admin action).
+ *
+ * @returns `create` — performs the creation, resolving to `true` on
+ *   success; `isLoading` and `error` — request state.
  */
 export function useCreateUser() {
   const [isLoading, setIsLoading] = useState(false);
@@ -95,7 +106,10 @@ export function useCreateUser() {
 }
 
 /**
- * Hook to assign a lock system to a user.
+ * Grants a user access to a lock system (admin action).
+ *
+ * @returns `assign` — performs the assignment, resolving to `true` on
+ *   success; `isLoading` and `error` — request state.
  */
 export function useAssignLockSystem() {
   const [isLoading, setIsLoading] = useState(false);
@@ -122,7 +136,10 @@ export function useAssignLockSystem() {
 }
 
 /**
- * Hook to unassign a lock system from a user.
+ * Revokes a user's access to a lock system (admin action).
+ *
+ * @returns `unassign` — performs the removal, resolving to `true` on
+ *   success; `isLoading` and `error` — request state.
  */
 export function useUnassignLockSystem() {
   const [isLoading, setIsLoading] = useState(false);
@@ -149,7 +166,10 @@ export function useUnassignLockSystem() {
 }
 
 /**
- * Hook to delete a non-admin user.
+ * Deletes a non-admin user (admin action).
+ *
+ * @returns `remove` — performs the deletion, resolving to `true` on
+ *   success; `isLoading` and `error` — request state.
  */
 export function useDeleteUser() {
   const [isLoading, setIsLoading] = useState(false);

@@ -4,8 +4,10 @@ import { useAuth } from "../context/auth-context";
 
 /**
  * Hook to log in and redirect into the app on success.
- * Returns `login` (resolves to true on success), plus loading/error state
- * for the form to render.
+ *
+ * @returns `login` — attempts the login and navigates to `/lock-systems`
+ *   on success, resolving to `true`/`false`; `isLoading` — whether a login
+ *   is in flight; `error` — message to render in the form, or `null`.
  */
 export function useLogin() {
   const { login: authLogin } = useAuth();

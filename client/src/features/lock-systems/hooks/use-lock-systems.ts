@@ -6,7 +6,11 @@ import { AccessLevel, Key } from "@/types/key";
 import { getApiError } from "@/lib/utils";
 
 /**
- * Hook to fetch all lock systems visible to the current user.
+ * Fetches all lock systems visible to the current user (admins see every
+ * system, regular users only their assigned ones).
+ *
+ * @returns `lockSystems` — the fetched systems; `isLoading` and `error` —
+ *   request state; `refetch` — runs the fetch again.
  */
 export function useLockSystems() {
   const [lockSystems, setLockSystems] = useState<LockSystem[]>([]);
@@ -44,7 +48,10 @@ export function useLockSystems() {
 }
 
 /**
- * Hook to create a new lock system.
+ * Creates a new lock system (admin action).
+ *
+ * @returns `create` — performs the creation, resolving to `true` on
+ *   success; `isLoading` and `error` — request state.
  */
 export function useCreateLockSystem() {
   const [isLoading, setIsLoading] = useState(false);
@@ -68,7 +75,11 @@ export function useCreateLockSystem() {
 }
 
 /**
- * Hook to fetch a single lock system by its referenceCode (e.g. "SYS-001").
+ * Fetches a single lock system.
+ *
+ * @param referenceCode - Code from the URL, e.g. "SYS-001".
+ * @returns `lockSystem` — the fetched system, or `null` while loading or on
+ *   failure; `isLoading` and `error` — request state.
  */
 export function useLockSystem(referenceCode: string) {
   const [lockSystem, setLockSystem] = useState<LockSystem | null>(null);
@@ -103,7 +114,11 @@ export function useLockSystem(referenceCode: string) {
 }
 
 /**
- * Hook to fetch all keys within the given lock system.
+ * Fetches the keys of one lock system.
+ *
+ * @param lockSystemId - UUID of the lock system.
+ * @returns `keys` — the fetched keys; `isLoading` and `error` — request
+ *   state; `refetch` — runs the fetch again (used after creating a key).
  */
 export function useLockSystemKeys(lockSystemId: string) {
   const [keys, setKeys] = useState<Key[]>([]);
@@ -141,7 +156,10 @@ export function useLockSystemKeys(lockSystemId: string) {
 }
 
 /**
- * Hook to create a key within a lock system.
+ * Creates a new key within a lock system (admin action).
+ *
+ * @returns `create` — performs the creation, resolving to `true` on
+ *   success; `isLoading` and `error` — request state.
  */
 export function useCreateKey() {
   const [isLoading, setIsLoading] = useState(false);
@@ -171,8 +189,11 @@ export function useCreateKey() {
 }
 
 /**
- * Fetches all keys and returns a map of lockSystemId → key count.
- * Used to show the number of keys on each lock system card.
+ * Fetches all keys and counts them per lock system. Used to show the
+ * number of keys on each lock system card; errors are ignored because the
+ * count is purely cosmetic.
+ *
+ * @returns `counts` — a map of lock system ID to key count.
  */
 export function useKeyCountsByLockSystem() {
   const [counts, setCounts] = useState<Record<string, number>>({});

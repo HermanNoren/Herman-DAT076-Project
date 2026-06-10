@@ -1,3 +1,7 @@
+/**
+ * Drizzle relation metadata enabling relational queries (`db.query.*`).
+ * The actual foreign keys are declared in the table definitions.
+ */
 import { relations } from "drizzle-orm";
 import { lockSystems } from "./lock-system.db";
 import { keys } from "./key.db";

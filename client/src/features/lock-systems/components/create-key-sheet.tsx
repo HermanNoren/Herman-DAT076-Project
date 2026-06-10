@@ -34,10 +34,16 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 type Props = {
+  /** UUID of the lock system the new key is created in. */
   lockSystemId: string;
+  /** Called after a successful creation so the parent can refetch its keys. */
   onCreated: () => void;
 };
 
+/**
+ * "Add Key" button that opens a slide-over form for creating a key inside
+ * the given lock system. Rendered for admins only.
+ */
 export const CreateKeySheet = ({ lockSystemId, onCreated }: Props) => {
   const [open, setOpen] = useState(false);
   const { create, isLoading, error } = useCreateKey();

@@ -1,6 +1,7 @@
 import { Aperture } from "lucide-react";
 import { LoginForm } from "@/features/auth/components/login-form";
 
+/** Public login page — a centered card around {@link LoginForm}. */
 export const LoginPage = () => {
   return (
     <div className="flex min-h-svh items-center justify-center bg-background">

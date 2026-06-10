@@ -1,9 +1,21 @@
+/**
+ * Database connection used by every service. Connects to Postgres via
+ * `DATABASE_URL` in production/development, or to an in-process PGlite
+ * instance under test.
+ */
 import "dotenv/config";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
+/** The Drizzle database handle type, parameterized with the full schema. */
 export type Database = NodePgDatabase<typeof schema>;
 
+/**
+ * Creates the database handle for the current environment.
+ *
+ * @returns A Postgres-backed handle, or a PGlite-backed one when
+ *   `NODE_ENV` is "test".
+ */
 function createDb(): Database {
   if (process.env.NODE_ENV === "test") {
     // Tests run against PGlite — an in-process Postgres (no Docker, no
@@ -18,4 +30,5 @@ function createDb(): Database {
   return drizzle(process.env.DATABASE_URL!, { schema });
 }
 
+/** The single shared database handle. */
 export const db = createDb();

@@ -5,6 +5,10 @@ import { LockSystemKeys } from "@/features/lock-systems/components/lock-system-k
 import { CreateKeySheet } from "@/features/lock-systems/components/create-key-sheet";
 import { useAuth } from "@/features/auth/context/auth-context";
 
+/**
+ * Detail page for one lock system (looked up by the reference code in the
+ * URL) with its table of keys. Admins also get an "Add Key" action.
+ */
 export const LockSystemDetailPage = () => {
   const { referenceCode } = useParams<{ referenceCode: string }>();
   const { user } = useAuth();

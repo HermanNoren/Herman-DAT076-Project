@@ -2,6 +2,12 @@ import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
 
+/**
+ * Tracks whether the viewport is below the mobile breakpoint (768px),
+ * updating on resize. Used by the sidebar to switch layouts.
+ *
+ * @returns `true` on mobile-sized viewports.
+ */
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 

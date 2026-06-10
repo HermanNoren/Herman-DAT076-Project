@@ -5,6 +5,10 @@ import { lockSystems } from "../../db/schema";
 import { LockSystem } from "../model/lock-system.interface";
 import { ILockSystemService } from "./ilock-system";
 
+/**
+ * {@link ILockSystemService} backed by the `lock_systems` table via Drizzle.
+ * See the interface for the full contract of each method.
+ */
 export class LockSystemDBService implements ILockSystemService {
   /** Returns all lock systems. */
   async getAll(): Promise<LockSystem[]> {

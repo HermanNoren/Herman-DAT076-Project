@@ -6,12 +6,20 @@ import { AssignLockSystemSheet } from "./assign-lock-system-sheet";
 import { useDeleteUser } from "../hooks/use-users";
 
 type RegularUserTableProps = {
+  /** The non-admin users to list. */
   users: User[];
+  /** All lock systems, passed through to the assignment sheet. */
   lockSystems: LockSystem[];
+  /** Called after an assignment change so the parent can refetch. */
   onAssigned: () => void;
+  /** Called after a successful deletion so the parent can refetch. */
   onDeleted: () => void;
 };
 
+/**
+ * Admin table of regular users with per-row actions: manage lock system
+ * assignments and delete the user.
+ */
 export const RegularUserList = ({ users, lockSystems, onAssigned, onDeleted }: RegularUserTableProps) => {
   const { remove } = useDeleteUser();
 
@@ -81,9 +89,11 @@ export const RegularUserList = ({ users, lockSystems, onAssigned, onDeleted }: R
 };
 
 type AdminListProps = {
+  /** The admin users to list. */
   admins: User[];
 };
 
+/** Read-only table of admin accounts (admins cannot be edited or deleted). */
 export const AdminList = ({ admins }: AdminListProps) => {
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">

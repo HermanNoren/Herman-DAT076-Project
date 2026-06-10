@@ -21,6 +21,10 @@ function rowToOrder(row: OrderRow): Order {
   };
 }
 
+/**
+ * {@link IOrderService} backed by the `orders` table via Drizzle. See the
+ * interface for the full contract of each method.
+ */
 export class OrderDBService implements IOrderService {
   /** Returns all orders. */
   async getOrders(): Promise<Order[]> {

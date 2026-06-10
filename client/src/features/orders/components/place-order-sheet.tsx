@@ -54,10 +54,16 @@ const schema = z
 type FormValues = z.infer<typeof schema>;
 
 type Props = {
+  /** The key being ordered. */
   keyItem: Key;
+  /** The system the key belongs to (shown in the sheet header). */
   lockSystem: LockSystem;
 };
 
+/**
+ * "Order" button that opens a slide-over form for ordering copies of a
+ * key. The "Please specify" field only appears when the reason is "Other".
+ */
 export const PlaceOrderSheet = ({ keyItem, lockSystem }: Props) => {
   const [open, setOpen] = useState(false);
   const { place, isLoading, error } = usePlaceOrder();

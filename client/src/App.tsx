@@ -7,7 +7,11 @@ import { UsersPage } from "./pages/users";
 import { LoginPage } from "./pages/login";
 import { AuthProvider, useAuth } from "@/features/auth/context/auth-context";
 
-/** Redirects unauthenticated users to /login, shows nothing while loading. */
+/**
+ * Gate for authenticated routes: renders nothing while the session check
+ * is loading, redirects to /login when logged out, otherwise renders its
+ * children.
+ */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   if (isLoading) return null;
@@ -15,6 +19,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/**
+ * Route table. `/login` is public; everything else is wrapped in
+ * {@link ProtectedRoute} and rendered inside the {@link AppLayout} shell.
+ */
 function AppRoutes() {
   return (
     <Routes>
@@ -36,6 +44,7 @@ function AppRoutes() {
   );
 }
 
+/** Application root: provides authentication state to the route tree. */
 function App() {
   return (
     <AuthProvider>

@@ -15,10 +15,12 @@ import { Aperture, KeyRound, ShoppingCart, Users } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { useAuth } from "@/features/auth/context/auth-context";
 
+/** A sidebar navigation entry. */
 type NavItem = {
   title: string;
   url: string;
   icon?: LucideIcon;
+  /** When true, the item is hidden from non-admin users. */
   adminOnly?: boolean;
 };
 
@@ -28,6 +30,10 @@ const navItems: NavItem[] = [
   { title: "Users", url: "/users", icon: Users, adminOnly: true },
 ];
 
+/**
+ * Main navigation sidebar. Admin-only items are filtered out for regular
+ * users; the footer shows the logged-in user with a log-out menu.
+ */
 export const AppSidebar = ({
   ...props
 }: React.ComponentProps<typeof Sidebar>) => {

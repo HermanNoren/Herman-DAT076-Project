@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { useLogin } from "../hooks/use-login";
 
+/** Client-side validation: both fields must be filled in before submitting. */
 const schema = z.object({
   email: z.string().min(1, "Email is required"),
   password: z.string().min(1, "Password is required"),
@@ -13,6 +14,11 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+/**
+ * Email + password login form. Field-level errors come from zod validation;
+ * server-side failures (wrong credentials) are rendered below the fields.
+ * On success, {@link useLogin} redirects into the app.
+ */
 export const LoginForm = () => {
   const { login, isLoading, error } = useLogin();
 

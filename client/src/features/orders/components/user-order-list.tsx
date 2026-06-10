@@ -2,9 +2,11 @@ import { OrderRow } from "../hooks/use-order-rows";
 import { REASON_LABELS, STATUS_LABELS } from "../lib/order-labels";
 
 type Props = {
+  /** The user's own orders joined with their display data. */
   rows: OrderRow[];
 };
 
+/** Read-only table of the logged-in user's own orders and their status. */
 export const UserOrderList = ({ rows }: Props) => {
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">

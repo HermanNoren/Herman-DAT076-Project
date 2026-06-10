@@ -6,9 +6,13 @@ import { userService } from "./lock-system";
 import { keyService } from "./key";
 import { requireAdmin, requireAuth } from "./auth";
 
+/** Routes for placing orders and managing their status. */
 export const orderRouter = express.Router();
+
+/** Shared order service instance. */
 export const orderService: IOrderService = new OrderDBService();
 
+/** Reasons accepted by `POST /orders`, used to validate the request body. */
 const ORDER_REASONS: OrderReason[] = [
   "lost",
   "damaged",
@@ -16,9 +20,16 @@ const ORDER_REASONS: OrderReason[] = [
   "stolen",
   "other",
 ];
+
+/** Statuses accepted by `PATCH /orders/:id/status`. */
 const ORDER_STATUSES: OrderStatus[] = ["placed", "ready", "collected"];
 
-/** GET /orders — returns all orders (admin) or only the logged-in user's orders (user). */
+/**
+ * `GET /orders` — lists orders: every order for admins, own orders only
+ * for regular users.
+ *
+ * Responses: 200 with the orders, 401 if not logged in.
+ */
 orderRouter.get("/", async (req: Request, res: Response<Order[] | string>) => {
   try {
     const user = await requireAuth(req, res);
@@ -35,7 +46,18 @@ orderRouter.get("/", async (req: Request, res: Response<Order[] | string>) => {
   }
 });
 
-/** POST /orders — places a new key order for the logged-in user. */
+/**
+ * `POST /orders` — places a key order for the logged-in user. The ordering
+ * user is always taken from the session, never from the body.
+ *
+ * Body: `{ keyId: string, quantity: number, reason: OrderReason,
+ * reasonDetail?: string }`. `reasonDetail` is required when `reason` is
+ * "other". `quantity` must be a positive integer.
+ *
+ * Responses: 201 with the created order, 400 if a field is invalid,
+ * 401 if not logged in, 403 if the user is not assigned to the key's lock
+ * system, 404 if the key does not exist.
+ */
 orderRouter.post(
   "/",
   async (
@@ -120,7 +142,14 @@ orderRouter.post(
   },
 );
 
-/** PATCH /orders/:id/status — advances the status of an order. Admin only. */
+/**
+ * `PATCH /orders/:id/status` — sets the status of an order. Admin only.
+ *
+ * Body: `{ status: OrderStatus }`.
+ *
+ * Responses: 200 with the updated order, 400 if the status is invalid,
+ * 401/403 if not logged in as an admin, 404 if the order does not exist.
+ */
 orderRouter.patch(
   "/:id/status",
   async (

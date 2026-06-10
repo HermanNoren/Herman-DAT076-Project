@@ -6,7 +6,11 @@ import { Key } from "@/types/key";
 import { getApiError } from "@/lib/utils";
 
 /**
- * Fetch orders for the current session user (admin gets all, user gets own).
+ * Fetches orders for the current session user (admins get every order,
+ * regular users only their own).
+ *
+ * @returns `orders` — the fetched orders; `isLoading` and `error` —
+ *   request state; `refetch` — runs the fetch again.
  */
 export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -42,7 +46,10 @@ export function useOrders() {
 }
 
 /**
- * Fetch all keys (for joining order data with key info).
+ * Fetches all keys, used to join orders with the labels of the keys they
+ * refer to. Errors are ignored — rows fall back to showing raw IDs.
+ *
+ * @returns `keys` — all fetched keys.
  */
 export function useAllKeys() {
   const [keys, setKeys] = useState<Key[]>([]);
@@ -63,7 +70,10 @@ export function useAllKeys() {
 }
 
 /**
- * Hook to place an order for the current session user.
+ * Places a key order for the current session user.
+ *
+ * @returns `place` — performs the order, resolving to `true` on success;
+ *   `isLoading` and `error` — request state.
  */
 export function usePlaceOrder() {
   const [isLoading, setIsLoading] = useState(false);
@@ -92,7 +102,10 @@ export function usePlaceOrder() {
 }
 
 /**
- * Hook to update an order's status (admin).
+ * Sets the status of an order (admin action).
+ *
+ * @returns `updateStatus` — performs the update, resolving to `true` on
+ *   success; `isLoading` and `error` — request state.
  */
 export function useUpdateOrderStatus() {
   const [isLoading, setIsLoading] = useState(false);

@@ -3,11 +3,18 @@ import { userService, lockSystemService } from "./lock-system";
 import { UserPublic, UserRole } from "../model/user.interface";
 import { requireAdmin } from "./auth";
 
+/** Roles accepted by `POST /users`, used to validate the request body. */
 const USER_ROLES: UserRole[] = ["admin", "user"];
 
+/** Routes for managing user accounts and their lock system assignments. */
 export const userRouter = express.Router();
 
-/** GET /users — returns all users. Admin only. */
+/**
+ * `GET /users` — lists all users. Admin only.
+ *
+ * Responses: 200 with all users (password hashes never included),
+ * 401/403 if not logged in as an admin.
+ */
 userRouter.get(
   "/",
   async (req: Request, res: Response<UserPublic[] | string>) => {
@@ -23,7 +30,15 @@ userRouter.get(
   },
 );
 
-/** POST /users — creates a new user. Admin only. */
+/**
+ * `POST /users` — creates a new user account. Admin only.
+ *
+ * Body: `{ name: string, email: string, password: string, role: UserRole }`.
+ * The password must be at least 8 characters.
+ *
+ * Responses: 201 with the created user, 400 if a field is invalid,
+ * 401/403 if not logged in as an admin, 409 if the email is taken.
+ */
 userRouter.post(
   "/",
   async (
@@ -70,7 +85,16 @@ userRouter.post(
   },
 );
 
-/** PATCH /users/:id/assign-lock-system — assigns a lock system to a user. Admin only. */
+/**
+ * `PATCH /users/:id/assign-lock-system` — grants a user access to a lock
+ * system. Admin only.
+ *
+ * Body: `{ lockSystemId: string }`.
+ *
+ * Responses: 200 with the updated user, 400 if the body is invalid,
+ * 401/403 if not logged in as an admin, 404 if the user or lock system
+ * does not exist.
+ */
 userRouter.patch(
   "/:id/assign-lock-system",
   async (
@@ -108,7 +132,15 @@ userRouter.patch(
   },
 );
 
-/** DELETE /users/:id — deletes a non-admin user. Admin only. */
+/**
+ * `DELETE /users/:id` — deletes a non-admin user. Admin only.
+ *
+ * The user's lock system assignments and orders are removed with them
+ * (ON DELETE CASCADE).
+ *
+ * Responses: 204 on success, 401/403 if not logged in as an admin,
+ * 403 if the target is an admin account, 404 if the user does not exist.
+ */
 userRouter.delete(
   "/:id",
   async (req: Request<{ id: string }>, res: Response<string>) => {
@@ -135,7 +167,15 @@ userRouter.delete(
   },
 );
 
-/** PATCH /users/:id/unassign-lock-system — removes a lock system assignment from a user. Admin only. */
+/**
+ * `PATCH /users/:id/unassign-lock-system` — revokes a user's access to a
+ * lock system. Admin only.
+ *
+ * Body: `{ lockSystemId: string }`.
+ *
+ * Responses: 200 with the updated user, 400 if the body is invalid,
+ * 401/403 if not logged in as an admin, 404 if the user does not exist.
+ */
 userRouter.patch(
   "/:id/unassign-lock-system",
   async (

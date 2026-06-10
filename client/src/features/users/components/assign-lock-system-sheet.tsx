@@ -14,11 +14,19 @@ import { LockSystem } from "@/types/lock-system";
 import { useAssignLockSystem, useUnassignLockSystem } from "../hooks/use-users";
 
 type Props = {
+  /** The user whose assignments are managed. */
   user: User;
+  /** All lock systems that can be assigned. */
   lockSystems: LockSystem[];
+  /** Called after every successful assign/unassign so the parent can refetch. */
   onAssigned: () => void;
 };
 
+/**
+ * Slide-over for managing which lock systems a user can access. Each
+ * system row toggles between Assign and Unassign; the local assigned-IDs
+ * state keeps the toggles responsive while the parent refetches.
+ */
 export const AssignLockSystemSheet = ({ user, lockSystems, onAssigned }: Props) => {
   const [assignedIds, setAssignedIds] = useState<string[]>(user.assignedLockSystemIds);
   const { assign, isLoading: isAssigning } = useAssignLockSystem();

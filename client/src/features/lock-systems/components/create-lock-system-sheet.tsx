@@ -24,9 +24,14 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 type Props = {
+  /** Called after a successful creation so the parent can refetch its list. */
   onCreated: () => void;
 };
 
+/**
+ * "Add Lock System" button that opens a slide-over form for creating a
+ * lock system. Rendered for admins only.
+ */
 export const CreateLockSystemSheet = ({ onCreated }: Props) => {
   const [open, setOpen] = useState(false);
   const { create, isLoading, error } = useCreateLockSystem();

@@ -4,6 +4,11 @@ import { CreateUserSheet } from "@/features/users/components/create-user-sheet";
 import { useGroupedUsers } from "@/features/users/hooks/use-users";
 import { useLockSystems } from "@/features/lock-systems/hooks/use-lock-systems";
 
+/**
+ * Admin page for managing user accounts: create users, manage lock system
+ * assignments and delete non-admin users. Admin accounts are listed
+ * separately and are read-only.
+ */
 export const UsersPage = () => {
   const { regularUsers, admins, refetch } = useGroupedUsers();
   const { lockSystems } = useLockSystems();

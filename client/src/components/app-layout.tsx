@@ -3,6 +3,10 @@ import { AppSidebar } from "./app-sidebar";
 import { SidebarInset, SidebarProvider } from "./ui/sidebar";
 import { AppHeader } from "./app-header";
 
+/**
+ * Shell for all authenticated pages: sidebar and header around the routed
+ * page content (`Outlet`). Mounted inside `ProtectedRoute` in `App.tsx`.
+ */
 export const AppLayout = () => {
   return (
     <SidebarProvider

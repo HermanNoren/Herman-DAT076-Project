@@ -15,6 +15,12 @@ import {
 } from "@/components/ui/sidebar";
 import { EllipsisVertical, LogOut } from "lucide-react";
 
+/**
+ * Derives avatar initials from a full name, e.g. "Alice Admin" → "AA".
+ *
+ * @param name - The user's display name.
+ * @returns The upper-cased first letter of each name part.
+ */
 const initials = (name: string) =>
   name
     .split(" ")
@@ -22,15 +28,21 @@ const initials = (name: string) =>
     .join("")
     .toUpperCase();
 
+/**
+ * Sidebar footer showing the logged-in user (name, role and avatar
+ * initials) with a dropdown containing the "Log out" action.
+ */
 export const NavUser = ({
   user,
   onLogout,
 }: {
+  /** Display data for the logged-in user; `subtitle` is the role label. */
   user: {
     name: string;
     subtitle: string;
     avatar: string;
   };
+  /** Called when "Log out" is clicked. */
   onLogout: () => void;
 }) => {
   const { isMobile } = useSidebar();

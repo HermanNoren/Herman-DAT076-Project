@@ -5,10 +5,16 @@ import { useAuth } from "@/features/auth/context/auth-context";
 import { PlaceOrderSheet } from "@/features/orders/components/place-order-sheet";
 
 type Props = {
+  /** The lock system the keys belong to (shown in the order form). */
   lockSystem: LockSystem;
+  /** The keys to list. */
   keys: Key[];
 };
 
+/**
+ * Table of a lock system's keys. Regular users get an "Order" action per
+ * row; admins only view the keys here (they create them via the sheet).
+ */
 export const LockSystemKeys = ({ lockSystem, keys }: Props) => {
   const { user } = useAuth();
 

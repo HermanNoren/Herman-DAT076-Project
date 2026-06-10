@@ -3,8 +3,13 @@ import { UserPublic } from "../model/user.interface";
 import { userService } from "./lock-system";
 
 /**
- * Resolves the session to a logged-in user.
- * Sends 401 and returns null if no valid session exists.
+ * Resolves the current session to a logged-in user.
+ *
+ * @param req - Incoming request; the user ID is read from its session.
+ * @param res - Response, used to report authentication failures.
+ * @returns The logged-in user, or `null` if the session is missing or refers
+ *   to a deleted user — in which case a 401 response has already been sent
+ *   and the caller must return without writing to `res`.
  */
 export async function requireAuth(
   req: Request,
@@ -24,8 +29,13 @@ export async function requireAuth(
 }
 
 /**
- * Resolves the session to a logged-in admin user.
- * Sends 401 if not logged in, 403 if logged in but not an admin.
+ * Resolves the current session to a logged-in admin user.
+ *
+ * @param req - Incoming request; the user ID is read from its session.
+ * @param res - Response, used to report authorization failures.
+ * @returns The logged-in admin, or `null` if not logged in (401 sent) or
+ *   logged in without the admin role (403 sent) — in either case the caller
+ *   must return without writing to `res`.
  */
 export async function requireAdmin(
   req: Request,

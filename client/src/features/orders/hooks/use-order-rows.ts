@@ -6,16 +6,24 @@ import { Order } from "@/types/order";
 
 /** An order joined with the display data of its key, lock system and user. */
 export type OrderRow = {
+  /** The order itself. */
   order: Order;
+  /** Label of the ordered key, falling back to the raw key ID. */
   keyLabel: string;
+  /** Reference code of the key's lock system, falling back to "—". */
   lockSystemCode: string;
+  /** Name of the ordering user, falling back to the raw user ID. */
   userName: string;
 };
 
 /**
  * Joins orders with key, lock system and user data into display rows.
- * Pass `withUsers: false` for non-admins — `GET /users` is admin-only,
- * so the user list is skipped entirely (userName falls back to the id).
+ *
+ * @param withUsers - Pass `false` for non-admins: `GET /users` is
+ *   admin-only, so the user lookup is skipped entirely and `userName`
+ *   falls back to the ID.
+ * @returns `rows` — the joined display rows; `isLoading` and `error` —
+ *   state of the order request; `refetch` — refetches the orders.
  */
 export function useOrderRows({ withUsers }: { withUsers: boolean }) {
   const { orders, isLoading, error, refetch } = useOrders();

@@ -28,6 +28,11 @@ async function rowToPublic(row: UserRow): Promise<UserPublic> {
   };
 }
 
+/**
+ * {@link IUserService} backed by the `users` and `user_lock_systems` tables
+ * via Drizzle. See the interface for the full contract of each method;
+ * comments here describe implementation specifics only.
+ */
 export class UserDBService implements IUserService {
   /** Returns a single user by UUID, or undefined if not found. Never includes the password hash. */
   async getUserById(id: string): Promise<UserPublic | undefined> {

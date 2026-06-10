@@ -4,6 +4,11 @@ import { useOrderRows } from "@/features/orders/hooks/use-order-rows";
 import { AdminOrderList } from "@/features/orders/components/admin-order-list";
 import { UserOrderList } from "@/features/orders/components/user-order-list";
 
+/**
+ * Orders page. Admins see every order with status controls; regular users
+ * see a read-only list of their own orders. The user list is only fetched
+ * for admins (`withUsers`), since that endpoint is admin-only.
+ */
 export const OrdersPage = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";

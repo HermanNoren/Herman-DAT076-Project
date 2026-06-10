@@ -4,6 +4,10 @@ import { CreateLockSystemSheet } from "@/features/lock-systems/components/create
 import { useLockSystems, useKeyCountsByLockSystem } from "@/features/lock-systems/hooks/use-lock-systems";
 import { useAuth } from "@/features/auth/context/auth-context";
 
+/**
+ * Lists the lock systems visible to the logged-in user. Admins also get a
+ * "Add Lock System" action in the header.
+ */
 export const LockSystemsPage = () => {
   const { user } = useAuth();
   const { lockSystems, refetch } = useLockSystems();
