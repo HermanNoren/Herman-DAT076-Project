@@ -31,57 +31,59 @@ export const AdminOrderList = ({ rows, onStatusChanged }: Props) => {
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-border bg-secondary/50">
-            {["User", "Key", "System", "Qty", "Reason", "Status"].map((h) => (
-              <th
-                key={h}
-                className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
-          {rows.map(({ order, keyLabel, lockSystemCode, userName }) => (
-            <tr key={order.id} className="hover:bg-secondary/30 transition-colors">
-              <td className="px-5 py-3.5 text-sm font-medium text-card-foreground">
-                {userName}
-              </td>
-              <td className="px-5 py-3.5 text-sm text-muted-foreground">{keyLabel}</td>
-              <td className="px-5 py-3.5 text-sm text-muted-foreground">{lockSystemCode}</td>
-              <td className="px-5 py-3.5 text-sm text-muted-foreground">{order.quantity}</td>
-              <td className="px-5 py-3.5 text-sm text-muted-foreground">
-                {REASON_LABELS[order.reason]}
-                {order.reasonDetail && (
-                  <span className="block text-xs text-muted-foreground/70">
-                    {order.reasonDetail}
-                  </span>
-                )}
-              </td>
-              <td className="px-5 py-3.5">
-                <Select
-                  value={order.status}
-                  onValueChange={(val) => handleStatusChange(order.id, val as OrderStatus)}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-border bg-secondary/50">
+              {["User", "Key", "System", "Qty", "Reason", "Status"].map((h) => (
+                <th
+                  key={h}
+                  className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap"
                 >
-                  <SelectTrigger className="w-40" size="sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ORDER_STATUSES.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {STATUS_LABELS[s]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </td>
+                  {h}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {rows.map(({ order, keyLabel, lockSystemCode, userName }) => (
+              <tr key={order.id} className="hover:bg-secondary/30 transition-colors">
+                <td className="px-5 py-3.5 text-sm font-medium text-card-foreground whitespace-nowrap">
+                  {userName}
+                </td>
+                <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">{keyLabel}</td>
+                <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">{lockSystemCode}</td>
+                <td className="px-5 py-3.5 text-sm text-muted-foreground">{order.quantity}</td>
+                <td className="px-5 py-3.5 text-sm text-muted-foreground whitespace-nowrap">
+                  {REASON_LABELS[order.reason]}
+                  {order.reasonDetail && (
+                    <span className="block max-w-xs text-xs text-muted-foreground/70 whitespace-normal">
+                      {order.reasonDetail}
+                    </span>
+                  )}
+                </td>
+                <td className="px-5 py-3.5">
+                  <Select
+                    value={order.status}
+                    onValueChange={(val) => handleStatusChange(order.id, val as OrderStatus)}
+                  >
+                    <SelectTrigger className="w-40" size="sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ORDER_STATUSES.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {STATUS_LABELS[s]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {rows.length === 0 && (
         <div className="flex flex-col items-center py-12">
           <p className="text-sm text-muted-foreground">No orders yet</p>

@@ -20,55 +20,57 @@ export const LockSystemKeys = ({ lockSystem, keys }: Props) => {
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-border bg-secondary/50">
-            <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Label
-            </th>
-            <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Description
-            </th>
-            <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Access Level
-            </th>
-            <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Action
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
-          {keys.map((key, i) => (
-            <tr
-              key={key.id}
-              className="hover:bg-secondary/30 transition-colors animate-fade-in"
-              style={{ animationDelay: `${i * 30}ms` }}
-            >
-              <td className="px-5 py-3.5">
-                <div className="flex items-center gap-2">
-                  <KeyRound className="h-3.5 w-3.5 text-foreground" />
-                  <span className="text-sm font-medium text-card-foreground">
-                    {key.label}
-                  </span>
-                </div>
-              </td>
-              <td className="px-5 py-3.5 text-sm text-muted-foreground">
-                {key.description}
-              </td>
-              <td className="px-5 py-3.5">
-                <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                  {key.accessLevel}
-                </span>
-              </td>
-              <td className="px-5 py-3.5 text-right">
-                {user?.role === "user" && (
-                  <PlaceOrderSheet keyItem={key} lockSystem={lockSystem} />
-                )}
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-border bg-secondary/50">
+              <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                Label
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                Description
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                Access Level
+              </th>
+              <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                Action
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {keys.map((key, i) => (
+              <tr
+                key={key.id}
+                className="hover:bg-secondary/30 transition-colors animate-fade-in"
+                style={{ animationDelay: `${i * 30}ms` }}
+              >
+                <td className="px-5 py-3.5">
+                  <div className="flex items-center gap-2">
+                    <KeyRound className="h-3.5 w-3.5 text-foreground" />
+                    <span className="text-sm font-medium text-card-foreground whitespace-nowrap">
+                      {key.label}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-5 py-3.5 text-sm text-muted-foreground">
+                  {key.description}
+                </td>
+                <td className="px-5 py-3.5">
+                  <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground whitespace-nowrap">
+                    {key.accessLevel}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5 text-right">
+                  {user?.role === "user" && (
+                    <PlaceOrderSheet keyItem={key} lockSystem={lockSystem} />
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       {keys.length === 0 && (
         <div className="flex flex-col items-center py-12">
           <p className="text-sm text-muted-foreground">No keys</p>

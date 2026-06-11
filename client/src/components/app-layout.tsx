@@ -17,7 +17,7 @@ export const AppLayout = () => {
       }
     >
       <AppSidebar variant="floating" collapsible="icon" />
-      <SidebarInset>
+      <SidebarInset className="min-w-0">
         <AppHeader />
         <main className="flex-1 p-6">
           <Outlet />
